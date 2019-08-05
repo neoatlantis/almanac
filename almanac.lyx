@@ -11,13 +11,18 @@
 \usepackage{indentfirst}
 \setlength{\parindent}{1.1em}  % setting the indentation to be two Chinese characters size.
 
+\renewcommand{\contentsname}{目录}
+
+
+%% 历算数据来源
+
 \def \calculatedyear {2014}
 \def \calculationslocation {./calculations/\calculatedyear/}
 \end_preamble
 \use_default_options true
 \maintain_unincluded_children false
 \language chinese-simplified
-\language_package default
+\language_package babel
 \inputencoding utf8-plain
 \fontencoding global
 \font_roman "default" "Noto Serif CJK SC"
@@ -74,8 +79,8 @@
 \headsep 0.5cm
 \footskip -0.5cm
 \columnsep 0.5cm
-\secnumdepth 3
-\tocdepth 3
+\secnumdepth 1
+\tocdepth 1
 \paragraph_separation skip
 \defskip smallskip
 \is_math_indent 0
@@ -94,10 +99,6 @@
 
 \begin_body
 
-\begin_layout Section
-太阳表
-\end_layout
-
 \begin_layout Standard
 \begin_inset ERT
 status open
@@ -111,15 +112,39 @@ fontsize{6pt}{8.5pt}
 selectfont 
 \end_layout
 
-\begin_layout Plain Layout
+\end_inset
+
 
 \end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+太阳表
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
 
 \begin_layout Plain Layout
 
 
 \backslash
-tablehead{月/日   & 视赤经      & 视赤纬           & 视黄经           & 均时差 
+tablehead{
+\backslash
+hline 月/日   & 视赤经      & 视赤纬           & 视黄经           & 均时差 
 \backslash
 
 \backslash
@@ -135,28 +160,6 @@ hline }
 begin{supertabular}{l|l|l|l|l} 
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-这里插入生成的太阳表数据，LaTeX格式
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
 \begin_layout Plain Layout
 
 
@@ -165,15 +168,6 @@ input{
 \backslash
 calculationslocation sun.tex}
 \end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
 
 \begin_layout Plain Layout
 
@@ -211,6 +205,93 @@ end{supertabular}
 的数值。赤经是春分点和通过天体中心的时圈在赤道上截取的弧长，也就是通过天体中心的时圈与通过春分点的时圈在天极的交角。赤纬是天体中心对赤道的角距。天体的赤经、赤纬
 是根据春分点和赤道计算的。视赤经和视赤纬（又称视位置）是真位置（以真赤道、真春分点为准的坐标）加光行差改正后的位置。黄经是春分点和通过天体中心的黄经圈在黄道上截
 取的弧长。
+\end_layout
+
+\begin_layout Standard
+太阳的赤纬
+\begin_inset Formula $\delta$
+\end_inset
+
+可用于计算各地太阳中天的高度。设所在地的纬度为
+\begin_inset Formula $\varphi$
+\end_inset
+
+，正午时太阳的高度为
+\begin_inset Formula $h$
+\end_inset
+
+，则有公式：
+\begin_inset Formula 
+\[
+h=90^{\circ}-\varphi+\delta
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+儒略日和恒星时表
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+tablehead{
+\backslash
+hline 月 & 日 & 儒略日 & 恒星时 
+\backslash
+
+\backslash
+ 
+\backslash
+hline}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{supertabular}{ll|l|l}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{
+\backslash
+calculationslocation juliancalc.tex}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{supertabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+儒略日是一种不用年和月的长期纪日法。简写为JD。它从公元前4713年（天文学上作为-4712年）1月1日格林尼治平午起算，延续不断。欲知相隔若干年两个日期之间的
+天数，利用儒略日就比较方便。本表所列是顺数而下到本日世界时0时的天数，供天文爱好者计算小行星、彗星、大行星及日、月位置用。
 \end_layout
 
 \begin_layout Section
