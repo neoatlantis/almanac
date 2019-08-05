@@ -8,6 +8,10 @@
 \begin_preamble
 \usepackage{xeCJK}
 \usepackage{supertabular,booktabs}
+
+
+\def \calculatedyear {2014}
+\def \calculationslocation {./calculations/\calculatedyear/}
 \end_preamble
 \use_default_options true
 \maintain_unincluded_children false
@@ -149,9 +153,17 @@ status open
 \end_layout
 
 \begin_layout Standard
-\begin_inset CommandInset include
-LatexCommand input
-filename "calculations/2014/sun.tex"
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{
+\backslash
+calculationslocation sun.tex}
+\end_layout
 
 \end_inset
 
@@ -236,9 +248,17 @@ begin{supertabular}{l|l|l|l}
 \end_layout
 
 \begin_layout Standard
-\begin_inset CommandInset include
-LatexCommand input
-filename "calculations/2014/solarterms.tex"
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{
+\backslash
+calculationslocation solarterms.tex}
+\end_layout
 
 \end_inset
 
