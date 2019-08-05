@@ -8,7 +8,8 @@
 \begin_preamble
 \usepackage{xeCJK}
 \usepackage{supertabular,booktabs}
-
+\usepackage{indentfirst}
+\setlength{\parindent}{1.1em}  % setting the indentation to be two Chinese characters size.
 
 \def \calculatedyear {2014}
 \def \calculationslocation {./calculations/\calculatedyear/}
@@ -75,8 +76,8 @@
 \columnsep 0.5cm
 \secnumdepth 3
 \tocdepth 3
-\paragraph_separation indent
-\paragraph_indentation default
+\paragraph_separation skip
+\defskip smallskip
 \is_math_indent 0
 \math_numbering_side default
 \quotes_style english
@@ -213,7 +214,19 @@ end{supertabular}
 \end_layout
 
 \begin_layout Section
-二十四节气
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+calculatedyear
+\end_layout
+
+\end_inset
+
+ 年二十四节气表
 \end_layout
 
 \begin_layout Standard
@@ -242,15 +255,6 @@ hline}
 begin{supertabular}{l|l|l|l}
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
 \begin_layout Plain Layout
 
 
@@ -259,15 +263,6 @@ input{
 \backslash
 calculationslocation solarterms.tex}
 \end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
 
 \begin_layout Plain Layout
 
@@ -286,6 +281,22 @@ end{supertabular}
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+节气是根据太阳的视位置决定的，太阳视黄经为
+\begin_inset Formula $270^{\circ}$
+\end_inset
+
+的时候是冬至，以后每隔
+\begin_inset Formula $15^{\circ}$
+\end_inset
+
+是一个节气。所载节气时刻系东经
+\begin_inset Formula $120^{\circ}$
+\end_inset
+
+标准时（北京时间）。
 \end_layout
 
 \end_body

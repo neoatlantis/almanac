@@ -6,7 +6,16 @@ from skyfield.constants import DAY_S, tau
 from skyfield.nutationlib import iau2000b
 from skyfield.units import Angle
 
+import sys
 from pytz import timezone
+
+from save_calculations import CalculationResults
+
+
+
+YEAR = int(sys.argv[1])
+assert YEAR > 2000 and YEAR < 3000
+
 
 
 objects = load("de421.bsp")
@@ -20,8 +29,8 @@ definitions = "立春 雨水 惊蛰 春分 清明 谷雨 立夏 小满 芒种 �
 
 
 
-t0 = timescale.utc(2014, 1, 1)
-t1 = timescale.utc(2014, 12, 31)
+t0 = timescale.utc(YEAR, 1, 1)
+t1 = timescale.utc(YEAR, 12, 31)
 
 def solartermsAt(t):
     t._nutation_angles = iau2000b(t.tt)
@@ -43,5 +52,6 @@ orderedOutput = [(
     for i in range(0, 12)
 ]
 
-for line in orderedOutput:
-    print(" & ".join(list(line)) + "\\\\")
+with CalculationResults("solarterms", YEAR) as writer:
+    for line in orderedOutput:
+        writer.writeline(" & ".join(list(line)) + "\\\\")
