@@ -19,7 +19,7 @@
 
 %% 历算数据来源
 
-\def \calculatedyear {2014}
+%\def \calculatedyear {2014}
 \def \calculationslocation {./calculations/\calculatedyear/}
 \end_preamble
 \use_default_options true
@@ -101,6 +101,24 @@
 \end_header
 
 \begin_body
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+def 
+\backslash
+calculatedyear {2014}
+\end_layout
+
+\end_inset
+
+
+\end_layout
 
 \begin_layout Section*
 \begin_inset ERT
