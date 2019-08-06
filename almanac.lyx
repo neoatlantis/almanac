@@ -9,7 +9,10 @@
 \usepackage{xeCJK}
 \usepackage{supertabular,booktabs}
 \usepackage{indentfirst}
+\usepackage{tikz} % for showing moon phase
+
 \setlength{\parindent}{1.1em}  % setting the indentation to be two Chinese characters size.
+\setlength\tabcolsep{3 pt}     % reduce cell column separation
 
 \renewcommand{\contentsname}{目录}
 
@@ -99,6 +102,43 @@
 
 \begin_body
 
+\begin_layout Section*
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+calculatedyear
+\end_layout
+
+\end_inset
+
+ 天文普及年历
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+制作者 NeoAtlantis
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
 \begin_inset ERT
 status open
@@ -112,19 +152,6 @@ fontsize{6pt}{8.5pt}
 selectfont 
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset CommandInset toc
-LatexCommand tableofcontents
-
-\end_inset
-
-
-\begin_inset Newpage newpage
 \end_inset
 
 
@@ -319,6 +346,24 @@ status open
 
 \backslash
 tablehead{
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+multicolumn{4}{l}{(东经$120^
+\backslash
+circ$标准时间)} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	
 \backslash
 hline 节气 & 时刻 & 节气 & 时刻 
 \backslash
@@ -326,7 +371,12 @@ hline 节气 & 时刻 & 节气 & 时刻
 \backslash
  
 \backslash
-hline}
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+}
 \end_layout
 
 \begin_layout Plain Layout
@@ -378,6 +428,238 @@ end{supertabular}
 \end_inset
 
 标准时（北京时间）。
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{@twocolumnfalse}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+月出月落及月相表
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\backslash
+fontsize{5pt}{6.5pt}
+\backslash
+selectfont 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+tablehead{
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+multicolumn{16}{l}{(格林尼治时间)} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+hline 月/日 & 月相 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$20^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$30^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$35^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$40^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$45^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$50^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$55^{
+\backslash
+circ}N$ &
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+	& & 
+\end_layout
+
+\begin_layout Plain Layout
+
+	月出 & 月没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	月出 & 月没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	月出 & 月没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	月出 & 月没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	月出 & 月没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	月出 & 月没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	月出 & 月没
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{supertabular}{l|l|ll|ll|ll|ll|ll|ll|ll}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{
+\backslash
+calculationslocation moon_rise_and_set.tex}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{supertabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{@twocolumnfalse}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_body
