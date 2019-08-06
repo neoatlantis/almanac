@@ -42,7 +42,8 @@ solartermsAt.rough_period=15
 
 
 t, y = almanac.find_discrete(t0, t1, solartermsAt)
-convertT = lambda t: t.astimezone(BJT).strftime("%m月%d日 %H:%M")
+
+convertT = lambda t: t.astimezone(BJT).strftime("%m月%d日 %H:%M:%S")
 
 outputorder = [definitions[yi] for yi in y]
 
