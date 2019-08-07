@@ -5,6 +5,7 @@ from skyfield import almanac
 from skyfield.constants import DAY_S, tau
 from skyfield.nutationlib import iau2000b
 from skyfield.units import Angle
+import json
 
 import sys
 from pytz import timezone
@@ -43,13 +44,16 @@ solartermsAt.rough_period=15
 
 t, y = almanac.find_discrete(t0, t1, solartermsAt)
 
-convertT = lambda t: t.astimezone(BJT).strftime("%m月%d日 %H:%M:%S")
+#convertT = lambda t: t.strftime("%m月%d日 %H:%M:%S")
 
 outputorder = [definitions[yi] for yi in y]
 
 results = {}
+resultsJSON = {}
 for ti, yi in zip(t, y):
-    results[definitions[yi]] = convertT(ti)
+    tiBJT = ti.astimezone(BJT)
+    results[definitions[yi]] = tiBJT.strftime("%m月%d日 %H:%M:%S")
+    resultsJSON[definitions[yi]] = tiBJT.strftime("%m-%d")
 
 
 
@@ -64,3 +68,6 @@ with CalculationResults("solarterms", YEAR) as writer:
         wl = " & ".join(list(line)) + "\\\\"
         print(wl)
         writer.writeline(wl)
+
+with CalculationResults("solarterms", YEAR, "json") as writer:
+    writer.writeline(json.dumps(resultsJSON))

@@ -2,8 +2,8 @@
 
 class CalculationResults:
 
-    def __init__(self, name, year):
-        self.path = "calculations/%d/%s.tex" % (year, name)
+    def __init__(self, name, year, filetype="tex"):
+        self.path = "calculations/%d/%s.%s" % (year, name, filetype)
 
     def writeline(self, line):
         self.file.write(line)

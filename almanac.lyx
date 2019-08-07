@@ -9,10 +9,10 @@
 \usepackage{xeCJK}
 \usepackage{supertabular,booktabs}
 \usepackage{indentfirst}
-\usepackage{tikz} % for showing moon phase
 
 \setlength{\parindent}{1.1em}  % setting the indentation to be two Chinese characters size.
 \setlength\tabcolsep{3 pt}     % reduce cell column separation
+
 
 \renewcommand{\contentsname}{目录}
 
@@ -77,10 +77,10 @@
 \leftmargin 1cm
 \topmargin 1cm
 \rightmargin 1cm
-\bottommargin 0.5cm
+\bottommargin 1.5cm
 \headheight 0cm
-\headsep 0.5cm
-\footskip -0.5cm
+\headsep 0cm
+\footskip 0cm
 \columnsep 0.5cm
 \secnumdepth 1
 \tocdepth 1
@@ -165,9 +165,43 @@ status open
 
 
 \backslash
-fontsize{6pt}{8.5pt}
+fontsize{5.5pt}{8pt}
 \backslash
 selectfont 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+calculatedyear
+\end_layout
+
+\end_inset
+
+ 日历
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{
+\backslash
+calculationslocation calendar.tex}
 \end_layout
 
 \end_inset
