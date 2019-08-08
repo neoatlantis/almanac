@@ -63,7 +63,7 @@ for year, month, day in listDates(YEAR):
 
         if ld.day == 1:
             subdisplay = "正二三四五六七八九十冬腊"[ld.month-1]
-            if ld.isLeapMonth: subdisplay = "闰" + lundardisplay
+            if ld.isLeapMonth: subdisplay = "闰" + subdisplay
             subdisplay += "月"
         else:
             if ld.day <= 10:

@@ -36,7 +36,13 @@ def moonrise_moonset(ephemeris, topos):
     def is_moon_up_at(t):
         """Return `True` if the moon has risen by time `t`."""
         t._nutation_angles = iau2000b(t.tt)
-        return topos_at(t).observe(moon).apparent().altaz()[0].degrees > -31/60
+        observation = topos_at(t).observe(moon).apparent()
+        alt, az, distance = observation.altaz()
+
+        moonRadius = 1737.1 / distance.km / 3.1415926 * 180.0 # 月球半径
+        parallax = 6378 / distance.km / 3.1415926 * 180.0     # 月球视差
+        
+        return observation.altaz()[0].degrees > -0.5666 - moonRadius + parallax 
 
     is_moon_up_at.rough_period = 0.5  # twice a day
     return is_moon_up_at

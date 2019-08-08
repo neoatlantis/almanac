@@ -7,7 +7,7 @@
 \textclass article
 \begin_preamble
 \usepackage{xeCJK}
-\usepackage{supertabular,booktabs}
+\usepackage{supertabular,booktabs,longtable,multicol}
 \usepackage{indentfirst}
 
 \setlength{\parindent}{1.1em}  % setting the indentation to be two Chinese characters size.
@@ -112,7 +112,7 @@ status open
 \backslash
 def 
 \backslash
-calculatedyear {2019}
+calculatedyear {2014}
 \end_layout
 
 \end_inset
@@ -167,7 +167,7 @@ status open
 \backslash
 fontsize{5.5pt}{8pt}
 \backslash
-selectfont 
+selectfont
 \end_layout
 
 \end_inset
@@ -188,7 +188,7 @@ calculatedyear
 
 \end_inset
 
- 日历
+ 年日历
 \end_layout
 
 \begin_layout Standard
@@ -207,6 +207,115 @@ calculationslocation calendar.tex}
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+calculatedyear
+\end_layout
+
+\end_inset
+
+ 年二十四节气表
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+tablehead{
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+multicolumn{4}{l}{(东经$120^
+\backslash
+circ$标准时间)} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+hline 节气 & 时刻 & 节气 & 时刻 
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{supertabular}{l|l|l|l}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{
+\backslash
+calculationslocation solarterms.tex}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{supertabular}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+节气是根据太阳的视位置决定的，太阳视黄经为
+\begin_inset Formula $270^{\circ}$
+\end_inset
+
+的时候是冬至，以后每隔
+\begin_inset Formula $15^{\circ}$
+\end_inset
+
+是一个节气。所载节气时刻系东经
+\begin_inset Formula $120^{\circ}$
+\end_inset
+
+标准时（北京时间）。
 \end_layout
 
 \begin_layout Section
@@ -230,6 +339,15 @@ hline 月/日   & 视赤经      & 视赤纬           & 视黄经           & �
  
 \backslash
 hline }
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+tabletail{
+\backslash
+hline}
 \end_layout
 
 \begin_layout Plain Layout
@@ -373,7 +491,14 @@ end{supertabular}
 天数，利用儒略日就比较方便。本表所列是顺数而下到本日世界时0时的天数，供天文爱好者计算小行星、彗星、大行星及日、月位置用。
 \end_layout
 
-\begin_layout Section
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset ERT
 status open
 
@@ -381,17 +506,28 @@ status open
 
 
 \backslash
-calculatedyear
+onecolumn
 \end_layout
 
 \end_inset
 
- 年二十四节气表
+
+\end_layout
+
+\begin_layout Section
+日出日没时刻表
 \end_layout
 
 \begin_layout Standard
 \begin_inset ERT
 status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{center}
+\end_layout
 
 \begin_layout Plain Layout
 
@@ -404,9 +540,7 @@ tablehead{
 
 	
 \backslash
-multicolumn{4}{l}{(东经$120^
-\backslash
-circ$标准时间)} 
+multicolumn{16}{l}{(格林尼治子午圈)} 
 \backslash
 
 \backslash
@@ -417,7 +551,112 @@ circ$标准时间)}
 
 	
 \backslash
-hline 节气 & 时刻 & 节气 & 时刻 
+hline 月 & 日 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$20^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$30^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$35^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$40^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$45^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$50^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$55^{
+\backslash
+circ}N$ &
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+	& &
+\end_layout
+
+\begin_layout Plain Layout
+
+	日出 & 日没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	日出 & 日没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	日出 & 日没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	日出 & 日没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	日出 & 日没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	日出 & 日没 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	日出 & 日没
+\end_layout
+
+\begin_layout Plain Layout
+
+	
 \backslash
 
 \backslash
@@ -435,7 +674,7 @@ hline
 
 
 \backslash
-begin{supertabular}{l|l|l|l}
+begin{supertabular}{ll|ll|ll|ll|ll|ll|ll|ll}
 \end_layout
 
 \begin_layout Plain Layout
@@ -444,7 +683,7 @@ begin{supertabular}{l|l|l|l}
 \backslash
 input{
 \backslash
-calculationslocation solarterms.tex}
+calculationslocation sunrise_and_set.tex}
 \end_layout
 
 \begin_layout Plain Layout
@@ -461,41 +700,60 @@ hline
 end{supertabular}
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-节气是根据太阳的视位置决定的，太阳视黄经为
-\begin_inset Formula $270^{\circ}$
-\end_inset
-
-的时候是冬至，以后每隔
-\begin_inset Formula $15^{\circ}$
-\end_inset
-
-是一个节气。所载节气时刻系东经
-\begin_inset Formula $120^{\circ}$
-\end_inset
-
-标准时（北京时间）。
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
 \begin_layout Plain Layout
 
 
 \backslash
-begin{@twocolumnfalse}
+end{center}
 \end_layout
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+本表载北纬
+\begin_inset Formula $20^{\circ}$
+\end_inset
+
+~
+\begin_inset Formula $55^{\circ}$
+\end_inset
+
+各地太阳出没的地方平时。每十天载一值。日出日没时刻是太阳上边缘和地平线相切的时刻，也就是太阳中心的真地心天顶距为
+\begin_inset Formula $90^{\circ}50'$
+\end_inset
+
+的时刻（即
+\begin_inset Formula $z=90^{\circ}+34'+16'$
+\end_inset
+
+)。这里蒙气差采用
+\begin_inset Formula $34'$
+\end_inset
+
+，太阳的半径为
+\begin_inset Formula $16'$
+\end_inset
+
+。
+\end_layout
+
+\begin_layout Standard
+欲求某地任一天的太阳出没时刻，可以按比例推算。把地方时改为标准时，则应视本地经度在本初子午圈之东或之西多少度加以改算：经度每差
+\begin_inset Formula $1^{\circ}$
+\end_inset
+
+，时间差
+\begin_inset Formula $4^{m}$
+\end_inset
+
+，在标准子午圈之西者加，在东者减。我国各地都以东经
+\begin_inset Formula $120^{\circ}$
+\end_inset
+
+的时间为标准，称为北京时间。
 \end_layout
 
 \begin_layout Standard
@@ -506,7 +764,7 @@ begin{@twocolumnfalse}
 \end_layout
 
 \begin_layout Section
-月出月落及月相表
+月出月没时刻及月相表
 \end_layout
 
 \begin_layout Standard
@@ -533,7 +791,7 @@ tablehead{
 
 	
 \backslash
-multicolumn{16}{l}{(格林尼治时间)} 
+multicolumn{16}{l}{(格林尼治子午圈)} 
 \backslash
 
 \backslash
@@ -691,22 +949,6 @@ hline
 
 \backslash
 end{supertabular}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-end{@twocolumnfalse}
 \end_layout
 
 \end_inset
