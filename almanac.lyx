@@ -319,7 +319,19 @@ end{supertabular}
 \end_layout
 
 \begin_layout Section
-太阳表
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+calculatedyear
+\end_layout
+
+\end_inset
+
+ 年太阳表
 \end_layout
 
 \begin_layout Standard
@@ -429,12 +441,31 @@ h=90^{\circ}-\varphi+\delta
 \end_layout
 
 \begin_layout Section
-儒略日和恒星时表
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+calculatedyear
+\end_layout
+
+\end_inset
+
+ 年儒略日和恒星时表
 \end_layout
 
 \begin_layout Standard
 \begin_inset ERT
 status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{center}
+\end_layout
 
 \begin_layout Plain Layout
 
@@ -481,6 +512,13 @@ hline
 end{supertabular}
 \end_layout
 
+\begin_layout Plain Layout
+
+
+\backslash
+end{center}
+\end_layout
+
 \end_inset
 
 
@@ -515,7 +553,19 @@ onecolumn
 \end_layout
 
 \begin_layout Section
-日出日没时刻表
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+calculatedyear
+\end_layout
+
+\end_inset
+
+ 年日出日没时刻表
 \end_layout
 
 \begin_layout Standard
@@ -764,7 +814,19 @@ end{center}
 \end_layout
 
 \begin_layout Section
-月出月没时刻及月相表
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+calculatedyear
+\end_layout
+
+\end_inset
+
+ 年民用晨昏蒙影表
 \end_layout
 
 \begin_layout Standard
@@ -773,11 +835,472 @@ status open
 
 \begin_layout Plain Layout
 
-%
+
 \backslash
-fontsize{5pt}{6.5pt}
+begin{center}
+\end_layout
+
+\begin_layout Plain Layout
+
+
 \backslash
-selectfont 
+tablehead{
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+multicolumn{16}{l}{(格林尼治子午圈)} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+hline 月 & 日 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$20^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$30^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$35^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$40^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$45^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$50^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$55^{
+\backslash
+circ}N$ &
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+	& &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{supertabular}{ll|ll|ll|ll|ll|ll|ll|ll}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{
+\backslash
+calculationslocation civil_twilight.tex}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{supertabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{center}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+calculatedyear
+\end_layout
+
+\end_inset
+
+ 年天文晨昏蒙影表
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{center}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+tablehead{
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+multicolumn{16}{l}{(格林尼治子午圈)} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+hline 月 & 日 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$20^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$30^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$35^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$40^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$45^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$50^{
+\backslash
+circ}N$ & &
+\end_layout
+
+\begin_layout Plain Layout
+
+	$55^{
+\backslash
+circ}N$ &
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+	& &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终 &
+\end_layout
+
+\begin_layout Plain Layout
+
+	晨光始 & 昏影终
+\end_layout
+
+\begin_layout Plain Layout
+
+	
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{supertabular}{ll|ll|ll|ll|ll|ll|ll|ll}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{
+\backslash
+calculationslocation astro_twilight.tex}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{supertabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{center}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+本表载北纬
+\begin_inset Formula $20^{\circ}$
+\end_inset
+
+~
+\begin_inset Formula $55^{\circ}$
+\end_inset
+
+各地的民用晨光始、民用昏影终、天文晨光始、天文昏影终的时刻，每十天一值。在日出前和日没后由高空大气散射太阳光引起的天空发亮的现象称为晨昏蒙影；在日出前的称为晨光
+，在日没后的叫做昏影。太阳中心在地平线以下
+\begin_inset Formula $6^{\circ}$
+\end_inset
+
+时称为民用晨光始或民用昏影终。民用昏影终时天空开始变暗，最亮的恒星已经出现了。太阳中心在地平线以下
+\begin_inset Formula $18^{\circ}$
+\end_inset
+
+时称为天文晨光始或天文昏影终，此时天空完全黑暗。天文晨光始时肉眼可以看到的最暗的星开始消失，天文昏影终时肉眼可以看到的最暗的星已经可以看到。
+\end_layout
+
+\begin_layout Standard
+在高纬度的地方，有一段时期整夜呈现晨昏蒙影现象，几乎没有黑夜可言，本表以横线表示。
+\end_layout
+
+\begin_layout Standard
+本表载时刻是地方时，改算为标准时的方法和计算与日出日没时刻相同。
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+calculatedyear
+\end_layout
+
+\end_inset
+
+ 年月出月没时刻及月相表
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{center}
 \end_layout
 
 \begin_layout Plain Layout
@@ -951,9 +1474,34 @@ hline
 end{supertabular}
 \end_layout
 
+\begin_layout Plain Layout
+
+
+\backslash
+end{center}
+\end_layout
+
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+本表载北纬
+\begin_inset Formula $20^{\circ}$
+\end_inset
+
+~
+\begin_inset Formula $55^{\circ}$
+\end_inset
+
+格林尼治子午圈上各纬度的月亮出没时刻，每天一值。月出月没时刻是月亮上边缘与地平线相接触的时刻。月出月没时刻每天变化很大，平均每天推迟50分钟。在一朔望月里，对本
+表所列纬度范围内，在下弦附近有一天没有月出，在上弦附近有一天没有月没。没有月出月没的地方表中用横线表示。
+\end_layout
+
+\begin_layout Standard
+如果求表载以外地方的月出月没时刻，可以内插得到。不在格林尼治子午圈的地方，把经度化为日的小数（不计正负号）作为内差引数。对于东经度，月出月没的时刻在格林尼治子午
+圈之前，在当天和前一天的月出或月没时刻之间用线性内插得出；对于西经度，则在当天和后一天的月出或月没时刻之间内插。这样求得的时刻是地方时，还要化为标准时。
 \end_layout
 
 \end_body
