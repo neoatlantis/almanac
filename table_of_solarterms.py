@@ -53,7 +53,7 @@ resultsJSON = {}
 for ti, yi in zip(t, y):
     tiBJT = ti.astimezone(BJT)
     results[definitions[yi]] = tiBJT.strftime("%m月%d日 %H:%M:%S")
-    resultsJSON[definitions[yi]] = tiBJT.strftime("%m-%d")
+    resultsJSON[definitions[yi]] = tiBJT.isoformat()
 
 
 

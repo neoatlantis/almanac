@@ -6,6 +6,8 @@ import os
 import json
 
 from lunardate import LunarDate
+import dateutil.parser
+from pytz import timezone
 
 from _calendar import listDates
 from save_calculations import CalculationResults
@@ -19,7 +21,17 @@ if not os.path.exists(solartermsPath):
     print("Run `python3 table_of_solarterms.py %d` first." % YEAR)
     exit(1)
 
+
+BJT = timezone("Asia/Shanghai")
+
 solarterms = json.loads(open(solartermsPath, "r").read())
+solartermTable = {}
+
+for solartermName in solarterms:
+    stDatetime = dateutil.parser.parse(solarterms[solartermName]).astimezone(BJT)
+    solartermTable[(stDatetime.month, stDatetime.day)] = solartermName
+
+
 
 
 
@@ -54,9 +66,9 @@ for year, month, day in listDates(YEAR):
     subdisplay = None # 农历或节气显示
 
     # 节气优先显示
-    for solarterm in solarterms:
-        if solarterms[solarterm] == "%02d-%02d" % (month, day):
-            subdisplay = solarterm
+    for stMonth, stDay in solartermTable:
+        if stMonth == month and stDay == day:
+            subdisplay = solartermTable[(stMonth, stDay)]
             break
 
     if subdisplay is None: # 非节气，显示农历

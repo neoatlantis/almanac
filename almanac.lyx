@@ -74,12 +74,12 @@
 \shortcut idx
 \color #008000
 \end_index
-\leftmargin 1cm
-\topmargin 1cm
+\leftmargin 1.5cm
+\topmargin 2cm
 \rightmargin 1cm
 \bottommargin 1.5cm
-\headheight 0cm
-\headsep 0cm
+\headheight 1.5cm
+\headsep 0.5cm
 \footskip 0cm
 \columnsep 0.5cm
 \secnumdepth 1
@@ -92,7 +92,7 @@
 \dynamic_quotes 0
 \papercolumns 2
 \papersides 2
-\paperpagestyle default
+\paperpagestyle headings
 \tracking_changes false
 \output_changes false
 \html_math_output 0
@@ -138,7 +138,16 @@ calculatedyear
 
 \begin_layout Labeling
 \labelwidthstring 00.00.0000
+
+\size footnotesize
 制作者 NeoAtlantis
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\size footnotesize
+电子邮件 gargoyle@neoatlantis.org
 \end_layout
 
 \begin_layout Standard
@@ -204,6 +213,13 @@ input{
 calculationslocation calendar.tex}
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
 \end_inset
 
 
@@ -1502,6 +1518,54 @@ end{center}
 \begin_layout Standard
 如果求表载以外地方的月出月没时刻，可以内插得到。不在格林尼治子午圈的地方，把经度化为日的小数（不计正负号）作为内差引数。对于东经度，月出月没的时刻在格林尼治子午
 圈之前，在当天和前一天的月出或月没时刻之间用线性内插得出；对于西经度，则在当天和后一天的月出或月没时刻之间内插。这样求得的时刻是地方时，还要化为标准时。
+\end_layout
+
+\begin_layout Section
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+calculatedyear
+\end_layout
+
+\end_inset
+
+ 年天象表
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{center}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{
+\backslash
+calculationslocation events.tex}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{center}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_body
