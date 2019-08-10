@@ -119,6 +119,66 @@ class PtolemaicAspects:
             output.append((ti, self.CONJUNCTION if yi else self.OPPOSITION))
         return output
 
+
+
+
+
+
+class MoonConjunctionFinder:
+
+    def __init__(self, ephemeris, year):
+        self.year_period = (
+            timescale.utc(YEAR, 1, 1),
+            timescale.utc(YEAR, 12, 31, 23, 59, 59)
+        )
+        self.moon = ephemeris["moon"]
+        self.topos_at = ephemeris["earth"].at
+
+    def __minRA(self, star, t):
+        moonApparent = self.topos_at(t).observe(self.moon).apparent()
+        starApparent = self.topos_at(t).observe(star).apparent()
+        moonRA = moonApparent.radec('date')[0].hours
+        starRA = starApparent.radec('date')[0].hours
+        deltaRA1 = abs(moonRA - starRA)
+        deltaRA2 = 24 - deltaRA1
+        return np.amin(np.array([deltaRA1, deltaRA2]), axis=0)
+
+    def findRough(self, star):
+        def finder(t):
+            t._nutation_angles = iau2000b(t.tt)
+            minRA = self.__minRA(star, t)
+            return minRA < 1.0 / 60
+        finder.rough_period = 1/29
+        t, y = almanac.find_discrete(
+            self.year_period[0], self.year_period[1],
+            finder
+        )
+        founds = list(zip(t, y))
+        results = []
+        for i in range(0, len(founds) - 1):
+            t1 = founds[i][0]
+            t2 = founds[i+1][0]
+            type1 = founds[i][1]
+            type2 = founds[i+1][1]
+            if type1 == True and type2 == False and (t2.tt-t1.tt) < 2.0/24:
+                results.append((t1, t2))
+        return results
+
+    def findFine(self, star, startT, endT):
+        def finder(t):
+            t._nutation_angles = iau2000b(t.tt)
+            moonApparent = self.topos_at(t).observe(self.moon).apparent()
+            starApparent = self.topos_at(t).observe(star).apparent()
+            moonRA = moonApparent.radec('date')[0].hours
+            starRA = starApparent.radec('date')[0].hours
+            return moonRA > starRA
+        finder.rough_period = 24 
+        return (almanac.find_discrete(startT, endT, finder)[0][0], None)        # each event entry is written as (time, data), where time is a single Time object
+        
+
+
+
+
 ##############################################################################
 # Register of all found events
 # Each list entry is given as (time, data)
@@ -161,11 +221,18 @@ for solarterm in solarterms:
 # Find out conjunctions with a few stars
 
 if True:
-    moonConjFinder = PtolemaicAspects(ephemeris421, YEAR, Moon)
+    """moonConjFinder = PtolemaicAspects(ephemeris421, YEAR, Moon)
     for star in founds["moon_conjunctions"]:
         for ti, yi in moonConjFinder.find(star, rough_period=29):
             if yi != PtolemaicAspects.CONJUNCTION: continue
-            founds["moon_conjunctions"][star].append((ti, yi))
+            founds["moon_conjunctions"][star].append((ti, yi))"""
+    moonConjFinder = MoonConjunctionFinder(ephemeris421, YEAR)
+    for star in founds["moon_conjunctions"]:
+        for startT, endT in moonConjFinder.findRough(star):
+            founds["moon_conjunctions"][star].append(
+                moonConjFinder.findFine(star, startT, endT)
+            )
+    
 
 ##############################################################################
 # Sort out events into month and push to table buffer
