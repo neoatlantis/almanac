@@ -9,6 +9,7 @@ from skyfield.earthlib import sidereal_time
 from skyfield.nutationlib import iau2000b
 
 from _utils import roundTimeToMinute
+from _constants import *
 
 from _calendar import listDates
 from save_calculations import CalculationResults
@@ -40,25 +41,6 @@ solarterms = json.loads(open(solartermsPath, "r").read())
 
 
 
-ephemeris421 = load("de421.bsp")
-timescale = load.timescale()
-BJT = timezone("Asia/Shanghai")
-
-
-Regulus         = Star(ra_hours=(10, 8, 21.98), dec_degrees=(11, 58, 3.0))      # 轩辕十四
-Aldebaran       = Star(ra_hours=(4, 35, 55.33), dec_degrees=(16, 30, 29.6))     # 毕宿五
-Spica           = Star(ra_hours=(13, 25, 11.53), dec_degrees=(-11, 9, 41.5))    # 角宿一
-
-Mercury = ephemeris421["Mercury"]
-Venus   = ephemeris421["Venus"]
-Earth   = ephemeris421["Earth"]
-Moon    = ephemeris421["Moon"]
-Mars    = ephemeris421["Mars"]
-Jupiter = ephemeris421["JUPITER BARYCENTER"]
-Saturn  = ephemeris421["SATURN BARYCENTER"]
-Uranus  = ephemeris421["Uranus Barycenter"]
-Neptune = ephemeris421["Neptune Barycenter"]
-Pluto   = ephemeris421["Pluto Barycenter"]
 
 
 ##############################################################################
@@ -174,7 +156,35 @@ class MoonConjunctionFinder:
             return moonRA > starRA
         finder.rough_period = 24 
         return (almanac.find_discrete(startT, endT, finder)[0][0], None)        # each event entry is written as (time, data), where time is a single Time object
-        
+
+
+
+class GreatestSunElongation:
+
+    def __init__(self):
+        self.year_period = (
+            timescale.utc(YEAR, 1, 1),
+            timescale.utc(YEAR, 12, 31, 23, 59, 59)
+        )
+        self.sun = ephemeris["sun"]
+        self.topos_at = ephemeris["earth"].at
+
+    def findRough(self, star):
+
+        def finder(t):
+            t._nutation_angles = iau2000b(t.tt)
+            sunRA, sunDec, _ = self.topos_at(t).observe(sun).apparent().radec('date')
+            starRA, starDec, _ = self.topos_at(t).observe(star).apparent().radec('date')
+
+
+
+            minRA = self.__minRA(star, t)
+            return minRA < 1.0 / 60
+        finder.rough_period = 1/29
+        t, y = almanac.find_discrete(
+            self.year_period[0], self.year_period[1],
+            finder
+        )
 
 
 
@@ -220,7 +230,7 @@ for solarterm in solarterms:
 #-----------------------------------------------------------------------------
 # Find out conjunctions with a few stars
 
-if True:
+if False:
     """moonConjFinder = PtolemaicAspects(ephemeris421, YEAR, Moon)
     for star in founds["moon_conjunctions"]:
         for ti, yi in moonConjFinder.find(star, rough_period=29):
@@ -327,16 +337,15 @@ for month in range(1, 13):
 ##############################################################################
 # tableBuffer is now a list containing 12 sub-lists of monthly events as rows.
 
-MERGED = 4
+MERGED = 3
 SINGLECOLUMN_COLUMNS = 4
 
 
 def writeTableHead():
     return """
-\\begin{tabular}{llll|llll|llll|llll}
+\\begin{tabular}{llll|llll|llll}
 \hline
-	月 & 日 & 时刻 & 天象 &
-	月 & 日 & 时刻 & 天象 &
+	月 & 日 & 时刻 & 天象 &         % 月 & 日 & 时刻 & 天象 &
 	月 & 日 & 时刻 & 天象 &
 	月 & 日 & 时刻 & 天象 \\tabularnewline
 \\hline"""
