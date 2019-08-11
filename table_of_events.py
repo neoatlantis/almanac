@@ -10,6 +10,8 @@ from skyfield.nutationlib import iau2000b
 
 from _utils import roundTimeToMinute
 from _constants import *
+from _rootfinder import  root_finder, critical_point_finder
+from _spheric_dist import spherical_distance
 
 from _calendar import listDates
 from save_calculations import CalculationResults
@@ -60,50 +62,75 @@ def derivate(f):
 
 
 
-class PtolemaicAspects:
 
-    CONJUNCTION = 1     # 合
-    OPPOSITION = 2      # 冲
 
-    def __init__(self, ephemeris, year, withStar):
+class SunAspectFinder:
+
+    CONJUNCTION = "Conjunction / 合日" 
+    CONJUNCTION_INFERIOR = "Inferior Conjunction / 下合日"
+    CONJUNCTION_SUPERIOR = "Superior Conjunction / 上合日"
+    OPPOSITION = "Opposition / 冲日"
+    QUADRATURE_WESTERN = "Western Quadrature / 西方照"
+    QUADRATURE_EASTERN = "Eastern Quadrature / 东方照"
+
+
+    def __init__(self):
         self.year_period = (
-            timescale.utc(YEAR-1, 6, 1),
-#            timescale.utc(YEAR, 4, 30, 23, 59, 59)
-            timescale.utc(YEAR+1, 6, 30, 23, 59, 59)
+            timescale.utc(YEAR, 1, 1),
+            timescale.utc(YEAR, 12, 31, 23, 59, 59)
         )
-        self.withStar = withStar
-        self.earth_at = ephemeris["earth"].at
 
-    def find(self, star, rough_period):
+    def _deltaLambdaAu(self, planet, t):
+        t._nutation_angles = iau2000b(t.tt)
+        sunApparent = Earth.at(t).observe(Sun).apparent()
+        planetApparent = Earth.at(t).observe(planet).apparent()
+        sunPos = sunApparent.ecliptic_latlon('date')
+        planetPos = planetApparent.ecliptic_latlon('date')
+
+        return (
+            sunPos[1].degrees - planetPos[1].degrees,
+            sunPos[2].km - planetPos[2].km
+        )
+
+    def find(self, planet):
         
-        @derivate
-        def d_deltaRA(t):
-            t._nutation_angles = iau2000b(t.tt)
-            baseApparent = self.earth_at(t).observe(self.withStar).apparent()
-            starApparent = self.earth_at(t).observe(star).apparent()
-            baseRA = baseApparent.radec('date')[0].hours
-            starRA = starApparent.radec('date')[0].hours
-            deltaRA1 = np.abs(baseRA - starRA)
-            deltaRA2 = 24 - deltaRA1
-            return np.minimum(deltaRA1, deltaRA2)
+        def f(t):
+            """Conjunction, opposition or quadature of planet with respect
+            to sun. By searching the roots of f(t), all aspects will be
+            determined. But remains unclear which aspect it is and shall
+            be found out later."""
+            return np.sin(self._deltaLambdaAu(planet, t)[0] / 90.0 * np.pi)
+        f.rough_period = 30
 
-        def finder(t):
-            return d_deltaRA(t) > 0
-        finder.rough_period = rough_period
-
-        t, y = almanac.find_discrete(
-            self.year_period[0], self.year_period[1],
-            finder
+        roots = root_finder(
+            start_time=timescale.utc(YEAR, 1, 1),
+            end_time=timescale.utc(YEAR, 12, 31, 23, 59, 59),
+            f=f
         )
 
-        output = []
-        for ti, yi in zip(t, y):
-            output.append((ti, self.CONJUNCTION if yi else self.OPPOSITION))
-        return output
+        results = []
+        for ti, _ in roots:
+            deltaLambda, deltaAu = self._deltaLambdaAu(planet, ti)
 
+            if planet in [Mercury, Venus]:
+                # Can only be conjunction(superior or inferior). By determining
+                # the Au difference it's easy to tell
+                results.append((
+                    ti,
+                    self.CONJUNCTION_INFERIOR
+                    if deltaAu > 0 else self.CONJUNCTION_SUPERIOR
+                ))
+            else:
+                sinL = round(np.sin(deltaLambda / 180.0 * np.pi))
+                cosL = round(np.cos(deltaLambda / 180.0 * np.pi))
+                results.append((ti, {
+                    (0, 1) : self.CONJUNCTION,
+                    (0, -1): self.OPPOSITION,
+                    (1, 0):  self.QUADRATURE_WESTERN,
+                    (-1, 0): self.QUADRATURE_EASTERN,
+                }[(sinL, cosL)]))
 
-
-
+        return results
 
 
 class MoonConjunctionFinder:
@@ -187,6 +214,32 @@ class GreatestSunElongation:
         )
 
 
+class StationaryFinder:
+
+    def __init__(self):
+        self.year_period = (
+            timescale.utc(YEAR, 1, 1),
+            timescale.utc(YEAR, 12, 31, 23, 59, 59)
+        )
+
+    def find(self, planet):
+        def g(t):
+            t._nutation_angles = iau2000b(t.tt)
+            ra1 = Earth.at(t).observe(planet).radec()[0].hours
+            ra2 = 24 - ra1
+            return np.amin(np.array([ra1, ra2]), axis=0)
+        g.rough_period = 20 
+        found = []
+        critical_points = critical_point_finder(
+            start_time=timescale.utc(2019, 1, 1),
+            end_time=timescale.utc(2019, 12, 31, 23, 59, 59),
+            f=g
+        )
+        for t, y in critical_points:
+            found.append(( t[1], None))
+        return found
+
+
 
 
 ##############################################################################
@@ -209,6 +262,26 @@ founds = {
     },
     "moon_phases": [],
     "solarterms": [],
+    "stationaries": {
+        Mercury: [],
+        Venus: [],
+        Mars: [],
+        Jupiter: [],
+        Saturn: [],
+        Uranus: [],
+        Neptune: [],
+        Pluto: [],
+    },
+    "planet_aspects": {
+        Mercury: [],
+        Venus: [],
+        Mars: [],
+        Jupiter: [],
+        Saturn: [],
+        Uranus: [],
+        Neptune: [],
+        Pluto: [],
+    }
 }
 
 #-----------------------------------------------------------------------------
@@ -242,7 +315,21 @@ if False:
             founds["moon_conjunctions"][star].append(
                 moonConjFinder.findFine(star, startT, endT)
             )
-    
+
+#-----------------------------------------------------------------------------
+# Find out stationaries
+if True:
+    print("Searching for stationaries...")
+    stationariesFinder = StationaryFinder()
+    for star in founds["stationaries"]:
+        founds["stationaries"][star] = stationariesFinder.find(star)
+
+#-----------------------------------------------------------------------------
+# Find out planet aspects to sun
+print("Searching for planet aspects...")
+sunAspectFinder = SunAspectFinder()
+for planet in founds["planet_aspects"]:
+    founds["planet_aspects"][planet] = sunAspectFinder.find(planet)
 
 ##############################################################################
 # Sort out events into month and push to table buffer
@@ -262,6 +349,14 @@ def translateMoonConjunctionEvents(eventsList, starName):
         output.append((t, utcT, "%s合月" % starName)) # TODO: 掩？
     return output
 
+def translatePlanetAspects(eventsList, starName):
+    return [
+        (t, utcT, "%s%s" % (
+            starName,
+            event.split("/")[-1].strip() # CN name defined in finder class
+        )) for t, utcT, event in eventsList
+    ]
+
 def translateMoonPhases(eventsList):
     output = []
     for t, utcT, data in eventsList:
@@ -273,49 +368,52 @@ def translateSolarterms(eventsList):
     for t, utcT, solarterm in eventsList:
         output.append((t, utcT, solarterm))
     return output
+
+def translateStationaries(eventsList, starName):
+    return [
+        (t, utcT, "%s留" % starName)
+        for t, utcT, data in eventsList
+    ]
         
 
 for month in range(1, 13):
     monthEvents = []
 
+    # 月相
+
     monthEvents += translateMoonPhases(
         filterEvents(founds["moon_phases"], month))
+
+    # 二十四节气
 
     monthEvents += translateSolarterms(
         filterEvents(founds["solarterms"], month))
 
-    monthEvents += translateMoonConjunctionEvents(filterEvents(
-        founds["moon_conjunctions"][Regulus], month), "轩辕十四")
+    listStar = { Regulus: "轩辕十四", Aldebaran: "毕宿五", Spica: "角宿一" }
 
-    monthEvents += translateMoonConjunctionEvents(filterEvents(
-        founds["moon_conjunctions"][Aldebaran], month), "毕宿五")
+    listPlanet = {
+        Mercury: "水星", Venus: "金星", Mars: "火星", Jupiter: "木星",
+        Saturn: "土星", Uranus: "天王星", Neptune: "海王星", Pluto: "冥王星"
+    }
 
-    monthEvents += translateMoonConjunctionEvents(filterEvents(
-        founds["moon_conjunctions"][Spica], month), "角宿一")
+    for star in listStar:
+        # 合月
+        monthEvents += translateMoonConjunctionEvents(filterEvents(
+            founds["moon_conjunctions"][star], month), listStar[star])
 
-    monthEvents += translateMoonConjunctionEvents(filterEvents(
-        founds["moon_conjunctions"][Mercury], month), "水星")
+    for planet in listPlanet:
+        # 合月
+        monthEvents += translateMoonConjunctionEvents(filterEvents(
+            founds["moon_conjunctions"][planet], month), listPlanet[planet])
+        # 留
+        monthEvents += translateStationaries(filterEvents(
+            founds["stationaries"][planet], month), listPlanet[planet])
+        # 冲、合、方照
+        monthEvents += translatePlanetAspects(filterEvents(
+            founds["planet_aspects"][planet], month), listPlanet[planet])
 
-    monthEvents += translateMoonConjunctionEvents(filterEvents(
-        founds["moon_conjunctions"][Venus], month), "金星")
 
-    monthEvents += translateMoonConjunctionEvents(filterEvents(
-        founds["moon_conjunctions"][Mars], month), "火星")
 
-    monthEvents += translateMoonConjunctionEvents(filterEvents(
-        founds["moon_conjunctions"][Jupiter], month), "木星")
-
-    monthEvents += translateMoonConjunctionEvents(filterEvents(
-        founds["moon_conjunctions"][Saturn], month), "土星")
-
-    monthEvents += translateMoonConjunctionEvents(filterEvents(
-        founds["moon_conjunctions"][Uranus], month), " 天王星")
-
-    monthEvents += translateMoonConjunctionEvents(filterEvents(
-        founds["moon_conjunctions"][Neptune], month), "海王星")
-
-    monthEvents += translateMoonConjunctionEvents(filterEvents(
-        founds["moon_conjunctions"][Pluto], month), "冥王星")
 
     monthEvents.sort(key=lambda entry: entry[0].tt)
 

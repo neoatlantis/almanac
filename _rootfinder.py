@@ -50,7 +50,7 @@ def critical_point_finder(
         #if dydt1 * dydt2 > 0: continue
         if (y_i1 - y_i0) * (y_i2 - y_i1) > 0: continue
 
-        print("Suspect:", ts_n[i].utc_iso(), dydt1, "\t", ts_n[i+2].utc_iso(), dydt2)
+        #print("Suspect:", ts_n[i].utc_iso(), dydt1, "\t", ts_n[i+2].utc_iso(), dydt2)
 
         # find between ts_i0 and ts_i2
         jd_a, jd_x, jd_b = jd_i0, jd_i1, jd_i2 
@@ -79,13 +79,13 @@ def critical_point_finder(
                 jd_a, y_a = jd_x, y_x
                 jd_x, y_x = jd_x2, y_x2
 
-            print(
+            """print(
                 "\t",
                 ts.tt_jd(jd_a).utc_iso(), "\t",
                 ts.tt_jd(jd_x).utc_iso(), "\t",
                 ts.tt_jd(jd_b).utc_iso(), "\t",
                 y_a, y_x, y_b
-            )
+            )"""
 
             dydt_a = (y_x - y_a) / (jd_x - jd_a)
             dydt_b = (y_b - y_x) / (jd_b - jd_x)
@@ -95,8 +95,8 @@ def critical_point_finder(
                 (ts.tt_jd(jd_a), ts.tt_jd(jd_x), ts.tt_jd(jd_b)),
                 (y_a, y_x, y_b)
             ))
-        else:
-            print(dydt_a, dydt_b)
+        #else:
+            #print(dydt_a, dydt_b)
 
     return founds
 
@@ -105,7 +105,7 @@ def critical_point_finder(
 
 
 
-def rootfinder(
+def root_finder(
     start_time, end_time, f,
     num=12,
     epsilon=1e-6,      # in julian days
@@ -206,17 +206,16 @@ def rootfinder(
 if __name__ == "__main__":
     from _constants import *
 
-    """
-    def f(t):   # conjunction moon - regulus
+    def f(t):   # conjunction sun - mercury
         t._nutation_angles = iau2000b(t.tt)
-        moonApparent = Earth.at(t).observe(Moon).apparent()
-        starApparent = Earth.at(t).observe(Regulus).apparent()
-        moonRA = moonApparent.radec('date')[0].hours
-        starRA = starApparent.radec('date')[0].hours
-        return moonRA - starRA
-    f.rough_period = 29
+        sunApparent = Earth.at(t).observe(Sun).apparent()
+        starApparent = Earth.at(t).observe(Mercury).apparent()
+        sunL = sunApparent.ecliptic_latlon('date')[1].degrees
+        starL = starApparent.ecliptic_latlon('date')[1].degrees
+        return np.sin((sunL - starL) / 180.0 * np.pi * 2)
+    f.rough_period = 30
 
-    roots = rootfinder(
+    roots = root_finder(
         start_time=timescale.utc(2019, 1, 1),
         end_time=timescale.utc(2019, 12, 31, 23, 59, 59),
         f=f
@@ -224,11 +223,11 @@ if __name__ == "__main__":
 
     for t, y in roots:
         print(t.utc_iso(), "\t", y)
-    """
 
+    exit()
 
     from _spheric_dist import spherical_distance
-    planet = Mercury 
+    planet =  Uranus 
 
     
 
