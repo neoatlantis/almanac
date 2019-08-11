@@ -61,6 +61,38 @@ def derivate(f):
     return derivate_of_f
 
 
+class MoonApsidesFinder:
+
+    PERIGEE = "Perigee / 近地点"
+    APOGEE = "Apogee / 远地点"
+
+    def __init__(self):
+        self.year_period = (
+            timescale.utc(YEAR, 1, 1),
+            timescale.utc(YEAR, 12, 31, 23, 59, 59)
+        )
+
+    def find(self):
+        def f(t):
+            t._nutation_angles = iau2000b(t.tt)
+            observ = Earth.at(t).observe(Moon).apparent().radec()
+            return observ[2].km
+        f.rough_period = 29
+        critical_points = critical_point_finder(
+            start_time=self.year_period[0],
+            end_time=self.year_period[1],
+            f=f,
+            num=2048,
+            epsilon=10000000
+        )
+        return [
+            (
+                t[1],
+                self.PERIGEE if y[2]-y[1]>0 and y[1]-y[0]<0 else self.APOGEE,
+            )
+            for t, y in critical_points
+        ]
+
 
 
 
@@ -218,6 +250,7 @@ class StationaryFinder:
 # Each list entry is given as (time, data)
 
 founds = {
+    "moon_apsides": [],
     "moon_conjunctions": {
         Regulus: [],
         Aldebaran: [],
@@ -273,19 +306,7 @@ for solarterm in solarterms:
 
 #-----------------------------------------------------------------------------
 # Find out conjunctions with a few stars
-
 if True:
-    """moonConjFinder = PtolemaicAspects(ephemeris421, YEAR, Moon)
-    for star in founds["moon_conjunctions"]:
-        for ti, yi in moonConjFinder.find(star, rough_period=29):
-            if yi != PtolemaicAspects.CONJUNCTION: continue
-            founds["moon_conjunctions"][star].append((ti, yi))"""
-    """moonConjFinder = MoonConjunctionFinder(ephemeris421, YEAR)
-    for star in founds["moon_conjunctions"]:
-        for startT, endT in moonConjFinder.findRough(star):
-            founds["moon_conjunctions"][star].append(
-                moonConjFinder.findFine(star, startT, endT)
-            )"""
     print("Searching for moon conjunctions...")
     moonConjunctionFinder = MoonConjunctionFinder()
     for star in founds["moon_conjunctions"]:
@@ -309,6 +330,11 @@ for planet in founds["planet_aspects"]:
     founds["planet_aspects"][planet] = sunAspectFinder.find(planet)
     print(".")
 
+#-----------------------------------------------------------------------------
+# Find out moon apsides
+print("Searching for moon apsides...")
+founds["moon_apsides"] = MoonApsidesFinder().find()
+
 ##############################################################################
 # Sort out events into month and push to table buffer
 tableBuffer = [[], [], [], [], [], [], [], [], [], [], [], []]
@@ -320,6 +346,12 @@ def filterEvents(source, month):
         if utcT.year != YEAR or utcT.month != month: continue
         output.append((t, utcT, data))
     return output
+
+def translateMoonApsides(eventsList):
+    return [
+        (t, utcT, "月球过" + data.split("/")[-1].strip())
+        for t, utcT, data in eventsList
+    ]
 
 def translateMoonConjunctionEvents(eventsList, starName):
     output = []
@@ -361,6 +393,11 @@ for month in range(1, 13):
 
     monthEvents += translateMoonPhases(
         filterEvents(founds["moon_phases"], month))
+
+    # 近地点 远地点
+
+    monthEvents += translateMoonApsides(
+        filterEvents(founds["moon_apsides"], month))
 
     # 二十四节气
 
@@ -413,15 +450,15 @@ for month in range(1, 13):
 ##############################################################################
 # tableBuffer is now a list containing 12 sub-lists of monthly events as rows.
 
-MERGED = 3
+MERGED = 4
 SINGLECOLUMN_COLUMNS = 4
 
 
 def writeTableHead():
     return """
-\\begin{tabular}{llll|llll|llll}
+\\begin{tabular}{llll|llll|llll|llll}
 \hline
-	月 & 日 & 时刻 & 天象 &         % 月 & 日 & 时刻 & 天象 &
+	月 & 日 & 时刻 & 天象 &          月 & 日 & 时刻 & 天象 &
 	月 & 日 & 时刻 & 天象 &
 	月 & 日 & 时刻 & 天象 \\tabularnewline
 \\hline"""

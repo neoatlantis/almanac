@@ -55,8 +55,8 @@ def critical_point_finder(
         # find between ts_i0 and ts_i2
         jd_a, jd_x, jd_b = jd_i0, jd_i1, jd_i2 
         y_a, y_x, y_b = y_i0, y_i1, y_i2
-        #dydt_a = dydt1
-        #dydt_b = dydt2
+        dydt_a = dydt1
+        dydt_b = dydt2
         
         while abs(jd_b - jd_a) > epsilon: #abs( (dydt_a + dydt_b) / 2 ) > epsilon:
             jd_x1 = (jd_a + jd_x) / 2
