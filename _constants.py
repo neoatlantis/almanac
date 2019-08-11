@@ -19,6 +19,7 @@ Regulus         = Star(ra_hours=(10, 8, 21.98), dec_degrees=(11, 58, 3.0))      
 Aldebaran       = Star(ra_hours=(4, 35, 55.33), dec_degrees=(16, 30, 29.6))     # 毕宿五
 Spica           = Star(ra_hours=(13, 25, 11.53), dec_degrees=(-11, 9, 41.5))    # 角宿一
 
+Sun     = ephemeris421["Sun"]
 Mercury = ephemeris421["Mercury"]
 Venus   = ephemeris421["Venus"]
 Earth   = ephemeris421["Earth"]
