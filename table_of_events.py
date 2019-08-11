@@ -135,55 +135,26 @@ class SunAspectFinder:
 
 class MoonConjunctionFinder:
 
-    def __init__(self, ephemeris, year):
+    def __init__(self):
         self.year_period = (
             timescale.utc(YEAR, 1, 1),
             timescale.utc(YEAR, 12, 31, 23, 59, 59)
         )
-        self.moon = ephemeris["moon"]
-        self.topos_at = ephemeris["earth"].at
 
-    def __minRA(self, star, t):
-        moonApparent = self.topos_at(t).observe(self.moon).apparent()
-        starApparent = self.topos_at(t).observe(star).apparent()
-        moonRA = moonApparent.radec('date')[0].hours
-        starRA = starApparent.radec('date')[0].hours
-        deltaRA1 = abs(moonRA - starRA)
-        deltaRA2 = 24 - deltaRA1
-        return np.amin(np.array([deltaRA1, deltaRA2]), axis=0)
-
-    def findRough(self, star):
-        def finder(t):
+    def find(self, star):
+        def f(t):
             t._nutation_angles = iau2000b(t.tt)
-            minRA = self.__minRA(star, t)
-            return minRA < 1.0 / 60
-        finder.rough_period = 1/29
-        t, y = almanac.find_discrete(
-            self.year_period[0], self.year_period[1],
-            finder
+            moonApparent = Earth.at(t).observe(Moon).apparent()
+            starApparent = Earth.at(t).observe(star).apparent()
+            return moonApparent.radec()[0]._degrees\
+                - starApparent.radec()[0]._degrees
+        f.rough_period = 29
+        roots = root_finder(
+            start_time=self.year_period[0],
+            end_time=self.year_period[1],
+            f=f
         )
-        founds = list(zip(t, y))
-        results = []
-        for i in range(0, len(founds) - 1):
-            t1 = founds[i][0]
-            t2 = founds[i+1][0]
-            type1 = founds[i][1]
-            type2 = founds[i+1][1]
-            if type1 == True and type2 == False and (t2.tt-t1.tt) < 2.0/24:
-                results.append((t1, t2))
-        return results
-
-    def findFine(self, star, startT, endT):
-        def finder(t):
-            t._nutation_angles = iau2000b(t.tt)
-            moonApparent = self.topos_at(t).observe(self.moon).apparent()
-            starApparent = self.topos_at(t).observe(star).apparent()
-            moonRA = moonApparent.radec('date')[0].hours
-            starRA = starApparent.radec('date')[0].hours
-            return moonRA > starRA
-        finder.rough_period = 24 
-        return (almanac.find_discrete(startT, endT, finder)[0][0], None)        # each event entry is written as (time, data), where time is a single Time object
-
+        return roots
 
 
 class GreatestSunElongation:
@@ -303,18 +274,23 @@ for solarterm in solarterms:
 #-----------------------------------------------------------------------------
 # Find out conjunctions with a few stars
 
-if False:
+if True:
     """moonConjFinder = PtolemaicAspects(ephemeris421, YEAR, Moon)
     for star in founds["moon_conjunctions"]:
         for ti, yi in moonConjFinder.find(star, rough_period=29):
             if yi != PtolemaicAspects.CONJUNCTION: continue
             founds["moon_conjunctions"][star].append((ti, yi))"""
-    moonConjFinder = MoonConjunctionFinder(ephemeris421, YEAR)
+    """moonConjFinder = MoonConjunctionFinder(ephemeris421, YEAR)
     for star in founds["moon_conjunctions"]:
         for startT, endT in moonConjFinder.findRough(star):
             founds["moon_conjunctions"][star].append(
                 moonConjFinder.findFine(star, startT, endT)
-            )
+            )"""
+    print("Searching for moon conjunctions...")
+    moonConjunctionFinder = MoonConjunctionFinder()
+    for star in founds["moon_conjunctions"]:
+        founds["moon_conjunctions"][star] = moonConjunctionFinder.find(star)
+        print(".")
 
 #-----------------------------------------------------------------------------
 # Find out stationaries
@@ -323,6 +299,7 @@ if True:
     stationariesFinder = StationaryFinder()
     for star in founds["stationaries"]:
         founds["stationaries"][star] = stationariesFinder.find(star)
+        print(".")
 
 #-----------------------------------------------------------------------------
 # Find out planet aspects to sun
@@ -330,6 +307,7 @@ print("Searching for planet aspects...")
 sunAspectFinder = SunAspectFinder()
 for planet in founds["planet_aspects"]:
     founds["planet_aspects"][planet] = sunAspectFinder.find(planet)
+    print(".")
 
 ##############################################################################
 # Sort out events into month and push to table buffer
