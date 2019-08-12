@@ -8,8 +8,10 @@ from skyfield.earthlib import sidereal_time
 from skyfield.nutationlib import iau2000b
 
 from _calendar import listDates
+from _constants import *
 from save_calculations import CalculationResults
 
+import numpy as np
 import sys
 import json
 from pytz import timezone
@@ -19,9 +21,6 @@ assert 2000 < YEAR < 3000
 
 
 
-ephemeris421 = load("de421.bsp")
-timescale = load.timescale()
-BJT = timezone("Asia/Shanghai")
 
 
 def moonrise_moonset(ephemeris, topos):
@@ -31,8 +30,8 @@ def moonrise_moonset(ephemeris, topos):
     a :class:`~skyfield.timelib.Time` and will return ``True`` if the
     moon is up, else ``False``.
     """
-    moon = ephemeris['moon']
-    topos_at = (ephemeris['earth'] + topos).at
+    moon = Moon
+    topos_at = (Earth + topos).at
 
     def is_moon_up_at(t):
         """Return `True` if the moon has risen by time `t`."""
@@ -40,8 +39,8 @@ def moonrise_moonset(ephemeris, topos):
         observation = topos_at(t).observe(moon).apparent()
         alt, az, distance = observation.altaz()
 
-        moonRadius = 1737.1 / distance.km / 3.1415926 * 180.0 # 月球半径
-        parallax = 6378 / distance.km / 3.1415926 * 180.0     # 月球视差
+        moonRadius = MOON_RADIUS / distance.km / np.pi * 180.0 # 月球半径
+        parallax = EARTH_RADIUS / distance.km / np.pi * 180.0  # 月球视差
         
         return observation.altaz()[0].degrees > -0.5666 - moonRadius + parallax 
 

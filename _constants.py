@@ -30,3 +30,7 @@ Saturn  = ephemeris421["SATURN BARYCENTER"]
 Uranus  = ephemeris421["Uranus Barycenter"]
 Neptune = ephemeris421["Neptune Barycenter"]
 Pluto   = ephemeris421["Pluto Barycenter"]
+
+
+MOON_RADIUS = 1737.1 # km
+EARTH_RADIUS = 6378  # km

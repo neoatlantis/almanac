@@ -206,51 +206,25 @@ def root_finder(
 if __name__ == "__main__":
     from _constants import *
 
-    def f(t):   # conjunction sun - mercury
-        t._nutation_angles = iau2000b(t.tt)
-        sunApparent = Earth.at(t).observe(Sun).apparent()
-        starApparent = Earth.at(t).observe(Mercury).apparent()
-        sunL = sunApparent.ecliptic_latlon('date')[1].degrees
-        starL = starApparent.ecliptic_latlon('date')[1].degrees
-        return np.sin((sunL - starL) / 180.0 * np.pi * 2)
-    f.rough_period = 30
-
-    roots = root_finder(
-        start_time=timescale.utc(2019, 1, 1),
-        end_time=timescale.utc(2019, 12, 31, 23, 59, 59),
-        f=f
-    )
-
-    for t, y in roots:
-        print(t.utc_iso(), "\t", y)
-
-    exit()
-
     from _spheric_dist import spherical_distance
-    planet =  Uranus 
-
-    
+    planet = Mercury 
 
     def g(t):
         t._nutation_angles = iau2000b(t.tt)
-        mLat, mLng = Earth.at(t).observe(planet).radec()[:2]
-        sLat, sLng = Earth.at(t).observe(Sun).radec()[:2]
+        mLat, mLng = Earth.at(t).observe(planet).apparent().radec('date')[:2]
+        sLat, sLng = Earth.at(t).observe(Sun).apparent().radec('date')[:2]
         return spherical_distance(
             (mLat._degrees, mLng.degrees),
             (sLat._degrees, sLng.degrees)
         )
 
-    def g(t):
-        t._nutation_angles = iau2000b(t.tt)
-        ra1 = Earth.at(t).observe(planet).radec()[0].hours
-        ra2 = 24 - ra1
-        return np.amin(np.array([ra1, ra2]), axis=0)
-
     g.rough_period = 20 
     critical_points = critical_point_finder(
-        start_time=timescale.utc(2019, 1, 1),
-        end_time=timescale.utc(2019, 12, 31, 23, 59, 59),
-        f=g
+        start_time=timescale.utc(2018, 1, 1),
+        end_time=timescale.utc(2018, 12, 31, 23, 59, 59),
+        f=g,
+        num=2048
     )
     for t, y in critical_points:
+        if abs(y[1]) < 17: continue
         print(t[1].utc_iso(), "\t", y[1]-y[0], "\t", y[1], "\t", y[2]-y[1])
