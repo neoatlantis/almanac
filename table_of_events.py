@@ -16,6 +16,7 @@ from _spheric_dist import spherical_distance
 from _calendar import listDates
 from save_calculations import CalculationResults
 
+import yaml
 import json
 import os
 import sys
@@ -327,8 +328,22 @@ founds = {
         Uranus: [],
         Neptune: [],
         Pluto: [],
-    }
+    },
+    "meteor_showers": [],
 }
+
+#-----------------------------------------------------------------------------
+# Load meteor showers
+print("Loading meteor showers...")
+meteorShowers = yaml.load(open(
+    os.path.join("external_predictions", str(YEAR), "meteor_shower.yaml"),
+    "r").read())
+for each in meteorShowers:
+    meteorShower = meteorShowers[each]
+    date = meteorShower["date"]
+    date = date.replace(tzinfo=UTC)
+    t = timescale.utc(date)
+    founds["meteor_showers"].append((t, meteorShower))
 
 #-----------------------------------------------------------------------------
 # sort out moonphase.json and append to register
@@ -392,6 +407,12 @@ def filterEvents(source, month):
         output.append((t, utcT, data))
     return output
 
+def translateMeteorShower(eventsList):
+    return [
+        (t, utcT, "%s,ZHR=%s" % (data["name"], data["ZHR"]))
+        for t, utcT, data in eventsList
+    ]
+
 def translateMoonApsides(eventsList):
     return [
         (t, utcT, "月球过" + data.split("/")[-1].strip())
@@ -450,6 +471,10 @@ def translateStationaries(eventsList, starName):
 
 for month in range(1, 13):
     monthEvents = []
+
+    # 流星雨
+    monthEvents += translateMeteorShower(
+        filterEvents(founds["meteor_showers"], month))
 
     # 月相
 

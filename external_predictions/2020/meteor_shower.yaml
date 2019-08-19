@@ -1,0 +1,110 @@
+# only peaks are recorded
+010QUA:
+    name: 象限仪座流星雨
+    date: 2020-01-04T08:20:00Z
+    ZHR: 120
+
+118GNO:
+    name: 矩尺座γ流星雨
+    date: 2020-03-14T00:00:00Z
+    ZHR: 6
+
+006LYR:
+    name: 天琴座流星雨
+    date: 2020-04-22T07:00:00Z
+    ZHR: 18
+
+137PPU:
+    name: 船尾座π流星雨
+    date: 2020-04-23T12:00:00Z
+    ZHR: 40
+
+031ETA:
+    name: 宝瓶座η流星雨
+    date: 2020-05-05T21:00:00Z
+    ZHR: 50
+
+171ARI:
+    name: 白羊座流星雨
+    date: 2020-06-07T00:00:00Z
+    ZHR: 30
+
+170JBO:
+    name: 牧夫座流星雨
+    date: 2020-06-27T22:00:00Z
+    ZHR: 0-100+
+
+007PER:
+    name: 英仙座流星雨
+    date: 2020-08-12T14:00:00Z
+    ZHR: 110
+
+012KCG:
+    name: 天鹅座κ流星雨
+    date: 2020-08-17T00:00:00Z
+    ZHR: 3
+
+221DSX:
+    name: 六分仪座流星雨
+    date: 2020-09-27T00:00:00Z
+    ZHR: "?"
+
+009DRA:
+    name: 天龙座流星雨
+    date: 2020-10-08T12:30:00Z
+    ZHR: 10
+
+002STA:
+    name: 金牛座南流星雨
+    date: 2020-10-10T00:00:00Z
+    ZHR: 5
+
+023EGE:
+    name: 双子座ε流星雨
+    date: 2020-10-18T00:00:00Z
+    ZHR: 3
+
+008ORI:
+    name: 猎户座流星雨
+    date: 2020-10-21T00:00:00Z
+    ZHR: 20
+
+022LMI:
+    name: 小狮座流星雨
+    date: 2020-10-24T00:00:00Z
+    ZHR: 2
+
+017NTA:
+    name: 金牛座北流星雨
+    date: 2020-11-12T00:00:00Z
+    ZHR: 12
+
+013LEO:
+    name: 狮子座流星雨
+    date: 2020-11-17T11:00:00Z
+    ZHR: 20
+
+246AMO:
+    name: 麒麟座α流星雨
+    date: 2020-11-21T12:00:00Z
+    ZHR: 5
+
+019MON:
+    name: 麒麟座流星雨
+    date: 2020-12-09T00:00:00Z
+    ZHR: 3
+
+016HYD:
+    name: 长蛇座σ流星雨
+    date: 2020-12-09T00:00:00Z
+    ZHR: 7
+
+004GEM:
+    name: 双子座流星雨
+    date: 2020-12-14T00:50:00Z
+    ZHR: 150
+
+015URS:
+    name: 小熊座流星雨
+    date: 2020-12-22T09:00:00Z
+    ZHR: 10

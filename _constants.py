@@ -13,6 +13,7 @@ from pytz import timezone
 ephemeris421 = load("de421.bsp")
 timescale = load.timescale()
 BJT = timezone("Asia/Shanghai")
+UTC = timezone("UTC")
 
 
 Regulus         = Star(ra_hours=(10, 8, 21.98), dec_degrees=(11, 58, 3.0))      # 轩辕十四
