@@ -174,7 +174,7 @@ status open
 
 
 \backslash
-fontsize{5.5pt}{8pt}
+fontsize{5.5pt}{7pt}
 \backslash
 selectfont
 \end_layout
@@ -213,13 +213,6 @@ input{
 calculationslocation calendar.tex}
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Newpage newpage
 \end_inset
 
 
@@ -332,6 +325,13 @@ end{supertabular}
 \end_inset
 
 标准时（北京时间）。
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -1563,6 +1563,13 @@ calculationslocation events.tex}
 end{center}
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
 \end_inset
 
 

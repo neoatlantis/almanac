@@ -10,7 +10,7 @@ import dateutil.parser
 from pytz import timezone
 
 from _calendar import listDates
-from save_calculations import CalculationResults
+from save_calculations import cached, CalculationResults
 
 
 YEAR = int(sys.argv[1])

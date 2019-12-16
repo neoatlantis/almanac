@@ -6,7 +6,7 @@ from skyfield.units import Angle
 from skyfield.earthlib import sidereal_time
 
 from _calendar import listDates
-from save_calculations import CalculationResults
+from save_calculations import cached, CalculationResults
 
 import sys
 
