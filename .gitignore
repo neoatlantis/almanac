@@ -1,4 +1,6 @@
 *~
+*.pdf
+*.svg
 __pycache__
 \#*
 *.sw?

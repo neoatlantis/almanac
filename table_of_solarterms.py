@@ -29,31 +29,39 @@ timescale = load.timescale()
 definitions = "春分 清明 谷雨 立夏 小满 芒种 夏至 小暑 大暑 立秋 处暑 白露 秋分 寒露 霜降 立冬 小雪 大雪 冬至 小寒 大寒 立春 雨水 惊蛰".split(" ")
 
 
+@cached("solarterms", YEAR)
+def findSolarterms(year):
+    t0 = timescale.utc(year, 1, 1)
+    t1 = timescale.utc(year, 12, 31)
 
-t0 = timescale.utc(YEAR, 1, 1)
-t1 = timescale.utc(YEAR, 12, 31)
+    def solartermsAt(t):
+        t._nutation_angles = iau2000b(t.tt)
+        e = earth.at(t)
+        _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
+        return (slon.radians // (tau / 24) % 24).astype(int)
+    solartermsAt.rough_period=15
 
-def solartermsAt(t):
-    t._nutation_angles = iau2000b(t.tt)
-    e = earth.at(t)
-    _, slon, _ = e.observe(sun).apparent().ecliptic_latlon('date')
-    return (slon.radians // (tau / 24) % 24).astype(int)
-solartermsAt.rough_period=15
+    t, y = almanac.find_discrete(t0, t1, solartermsAt)
 
+    outputorder = [definitions[yi] for yi in y]
 
+    results = {}
+    resultsJSON = {}
+    for ti, yi in zip(t, y):
+        tiBJT = ti.astimezone(BJT)
+        results[definitions[yi]] = tiBJT.strftime("%m月%d日 %H:%M:%S")
+        resultsJSON[definitions[yi]] = tiBJT.isoformat()
 
-t, y = almanac.find_discrete(t0, t1, solartermsAt)
+    return {
+        "order": outputorder,
+        "solarterms-rendered": results,
+        "solarterms-iso": resultsJSON,
+    }
 
-#convertT = lambda t: t.strftime("%m月%d日 %H:%M:%S")
-
-outputorder = [definitions[yi] for yi in y]
-
-results = {}
-resultsJSON = {}
-for ti, yi in zip(t, y):
-    tiBJT = ti.astimezone(BJT)
-    results[definitions[yi]] = tiBJT.strftime("%m月%d日 %H:%M:%S")
-    resultsJSON[definitions[yi]] = tiBJT.isoformat()
+#-----------------------------------------------------------------------------
+data = findSolarterms()
+outputorder, results, resultsJSON = \
+    data["order"], data["solarterms-rendered"], data["solarterms-iso"]
 
 
 

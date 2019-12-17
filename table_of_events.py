@@ -563,6 +563,17 @@ def writeTableFoot():
     return """\\hline \\end{tabular}"""
 
 
+
+
+with open("calculations-cache/events-%d.yaml" % YEAR, "w+") as writer:
+    writer.write(yaml.dump(
+        tableBuffer,
+        allow_unicode=True,
+        default_flow_style=False
+    ))
+
+
+
 with CalculationResults("events", YEAR) as writer:
 
     for m in range(1, 13, MERGED):

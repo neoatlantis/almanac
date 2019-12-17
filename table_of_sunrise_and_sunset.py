@@ -8,7 +8,7 @@ from skyfield.earthlib import sidereal_time
 from skyfield.nutationlib import iau2000b
 
 from _calendar import listDates
-from save_calculations import CalculationResults
+from save_calculations import cached, CalculationResults
 
 import sys
 from pytz import timezone
@@ -49,35 +49,40 @@ locations = [
 ]
 
 
+@cached("sunriseset", YEAR)
+def calculateSunRiseSet(year):
+    utcStart = timescale.utc(year, 1, 1)
+    utcEnd   = timescale.utc(year, 12, 31, 23, 59, 59)
+    founds = {
+        -0.8333: {},
+        -6: {},
+        -18: {},
+    }
 
-utcStart = timescale.utc(YEAR, 1, 1)
-utcEnd   = timescale.utc(YEAR, 12, 31, 23, 59, 59)
-founds = {
-    -0.8333: {},
-    -6: {},
-    -18: {},
-}
+    for crit in founds:
+        print("Calculating: sun is below horizont with %f degrees." % -crit)
 
-for crit in founds:
-    print("Calculating: sun is below horizont with %f degrees." % -crit)
+        for year, month, day in listDates(YEAR):
+            utcStart = timescale.utc(year, month, day, 0, 0, 0)
+            utcEnd = timescale.utc(year, month, day, 23, 59, 59) 
+            
+            if month not in founds[crit]:
+                founds[crit][month] = {}
+            founds[crit][month][day] = {}
 
-    for year, month, day in listDates(YEAR):
-        utcStart = timescale.utc(year, month, day, 0, 0, 0)
-        utcEnd = timescale.utc(year, month, day, 23, 59, 59) 
-        
-        founds[crit][(month, day)] = {}
+            for calcLat, calcTopo in locations:
+                t, y = almanac.find_discrete(
+                    utcStart,
+                    utcEnd, 
+                    sunrise_sunset(ephemeris421, calcTopo, crit)
+                )
 
-        for calcLat, calcTopo in locations:
-            t, y = almanac.find_discrete(
-                utcStart,
-                utcEnd, 
-                sunrise_sunset(ephemeris421, calcTopo, crit)
-            )
-
-            founds[crit][(month, day)][calcLat] = {'rise': None, 'set': None}
-            for ti, yi in zip(t, y):
-                founds[crit][(month, day)][calcLat]["rise" if yi else "set"] = ti
-
+                founds[crit][month][day][calcLat] = {'rise': None, 'set': None}
+                for ti, yi in zip(t, y):
+                    founds[crit][month][day][calcLat]["rise" if yi else "set"] =\
+                        ti.utc_strftime("%H:%M")
+    return founds
+founds = calculateSunRiseSet()
 
 
 
@@ -85,7 +90,7 @@ for crit in founds:
 
 def translateTime(t):
     if t is None: return "---"
-    return t.utc_strftime("%H:%M")
+    return t
 
 
 outputmapping = {
@@ -118,7 +123,7 @@ for crit in outputmapping:
                 writer.writeline(" & " * (2*len(locations) + 1) + " \\\\")
 
             line = []
-            result = founds[crit][(month, day)]
+            result = founds[crit][month][day]
 
             if lastMonth != month:
                 line.append(str(month))

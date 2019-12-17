@@ -38,7 +38,11 @@ def _getCachedResult(name, year, calcfunc):
         except:
             print("Cache %s(%d) corrupted. Calculate for that." % (name,year))
     data = calcfunc(year=year)
-    open(path, "w+").write(yaml.dump(data, default_flow_style=False))
+    open(path, "w+").write(yaml.dump(
+        data,
+        default_flow_style=False,
+        allow_unicode=True
+    ))
     return data
 
 
