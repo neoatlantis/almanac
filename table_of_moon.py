@@ -57,6 +57,17 @@ def moonrise_moonset(ephemeris, topos):
 
 
 
+def translateTime(t):
+    if t is None: return "---"
+    return t.utc_strftime("%H:%M")
+
+def translatePhase(phase):
+    if phase is None: return ""
+    ti, yi = phase
+    name = ["朔", "上弦", "望", "下弦"][yi]
+    return "%s %s" % (translateTime(ti), name)
+
+
 @cached(TOPIC, YEAR)
 def calculateMoonPhase(year):
 
@@ -84,7 +95,8 @@ def calculateMoonPhase(year):
             )
 
             for ti, yi in zip(t, y):
-                founds[mm][dd]["riseset"][calcLat]["rise" if yi else "set"] = ti
+                founds[mm][dd]["riseset"][calcLat]["rise" if yi else "set"] = \
+                    translateTime(ti)
 
     # 3. calcualte moon phases
     utcStart = timescale.utc(year, 1, 1)
@@ -92,8 +104,7 @@ def calculateMoonPhase(year):
     t, y = almanac.find_discrete(utcStart, utcEnd, almanac.moon_phases(ephemeris421))
     for ti, yi in zip(t, y):
         yyyy, mm, dd, _, __, ___ = ti.utc
-        founds[mm][dd]["phase"] = (ti, yi)
-
+        founds[mm][dd]["phase"] = translatePhase((ti, yi))
 
     return founds
 
@@ -103,15 +114,6 @@ founds = calculateMoonPhase()
 
 # print out all info
 
-def translateTime(t):
-    if t is None: return "---"
-    return t.utc_strftime("%H:%M")
-
-def translatePhase(phase):
-    if phase is None: return ""
-    ti, yi = phase
-    name = ["朔", "上弦", "望", "下弦"][yi]
-    return "%s %s" % (translateTime(ti), name)
 
 
 with CalculationResults("moon_rise_and_set", YEAR) as writer:
@@ -127,12 +129,11 @@ with CalculationResults("moon_rise_and_set", YEAR) as writer:
         result = founds[month][day]
 
         line.append("%d/%d" % (month, day))
-        line.append(translatePhase(result["phase"]))
+        line.append(result["phase"] or " ")
 
         for lat, _ in locations:
             riseset = result["riseset"][lat]
-            line.append(translateTime(riseset["rise"]))
-            line.append(translateTime(riseset["set"]))
-
+            line.append(riseset["rise"] or "---")
+            line.append(riseset["set"] or "---")
 
         writer.writeline(" & ".join(line) + " \\\\")

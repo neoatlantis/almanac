@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 
 import sys
+import calendar
 import datetime
+from math import ceil
+
+from lunardate import LunarDate
 
 from skyfield.api import load, Topos
 from skyfield.units import Angle
 from skyfield.earthlib import sidereal_time
 
+from _svgnode import *
 from _calendar import listDates
-from save_calculations import cached, CalculationResults
+from save_calculations import cached, CalculationResults, getCached
 
 
 
@@ -26,7 +31,7 @@ def convertRA(ra):
 
 def convertDeg(deg):
     sign, d, m, _ = deg.signed_dms()
-    return "%s%d°%d'" % (convertSign(sign), d, m)
+    return "%s%d°%02d'" % (convertSign(sign), d, m)
 
 def convertSidereal(sr):
     sign, _, m, s = sr.signed_hms()
@@ -37,24 +42,6 @@ def convertSidereal(sr):
 
 
 
-class SVGNode(dict):
-
-    def __init__(self, name, **kvargs):
-        self.name = name
-        self.attrs = kvargs
-        self.children = []
-
-    def append(self, what):
-        self.children.append(what)
-        return self
-
-    def __str__(self):
-        return "<%s %s>%s</%s>" % (
-            self.name,
-            " ".join(["%s=\"%s\"" % (k, self.attrs[k]) for k in self.attrs]),
-            "".join([str(e) for e in self.children]),
-            self.name
-        )
         
 
 
@@ -78,14 +65,14 @@ def svgTable(table, headers, fontsize=10):
     for i in range(0, len(headers)):
         g.append(text(x, y).append(headers[i]))
         x += headerWidth[i]
-    y += fontsize * 1.5
+    y += fontsize * 1.6
 
     for row in table:
         x = 0
         for i in range(0, len(row)):
             g.append(text(x, y).append(row[i]))
             x += headerWidth[i]
-        y += fontsize * 1.5
+        y += fontsize * 1.6
 
     return g
         
@@ -97,6 +84,11 @@ class MonthGenerator:
     def __init__(self, year, month):
         self.year = year
         self.month = month
+        self.monthLastDay = calendar.monthrange(year, month)[1]
+
+        self.calculationResults = {
+            "moonphase": getCached("moonphase", self.year),
+        }
 
         self.svg = SVGNode(
             "svg",
@@ -105,70 +97,83 @@ class MonthGenerator:
         )
 
         self.svg.append("""
-            <style>text{
-                font-family: monospace;
-                font-size: 7pt;
-                fill: black;
-                white-space: pre;
-                z-index:1000;
-            }</style>""")
+        <style>
+        text{
+            font-family: monospace;
+            font-size: 7pt;
+            fill: black;
+            white-space: pre;
+            z-index:1000;
+        }
+        .title{
+            font-family: serif;
+            font-weight: bold;
+            font-size: 15pt;
+            fill: black;
+        }
+        
+        </style>""")
 
         self.svg.append(SVGNode("rect", 
             x=0, y=0, width="842pt", height="595pt",
             fill="#DDDDDD", stroke="red", 
         ))
 
-        
-        t = svgTable(
-            [
-                ["农历"],
-                ["视赤经", "18h40m", "18h40m", "18h40m"],
-                ["视赤纬", "-23°15'"],
-                ["视黄经", "180°15'"],
-                ["均时差", "-15h33m"],
+        midday = ceil(self.monthLastDay / 2) 
 
-                ["20N 月出", "09:00", "18:00"],
-                ["    月没", "09:00", "18:00"],
+        table1 = self._tableOfMonth(1, midday)
+        table1.attrs["transform"] = "translate(30 40)"
+        self.svg.append(table1)
 
-                ["30N 月出", "09:00", "18:00"],
-                ["    月没", "09:00", "18:00"],
-
-                ["35N 月出", "09:00", "18:00"],
-                ["    月没", "09:00", "18:00"],
-
-                ["40N 月出", "09:00", "18:00"],
-                ["    月没", "09:00", "18:00"],
-
-                ["45N 月出", "09:00", "18:00"],
-                ["    月没", "09:00", "18:00"],
-
-                ["50N 月出", "09:00", "18:00"],
-                ["    月没", "09:00", "18:00"],
-            ],
-            [ "        " ] + [ "%02d (一)" % i for i in range(1,17) ],
-            fontsize=7,
-        )
-        t = self._tableOfMonth(1, 16)
-        t.attrs["transform"] = "translate(10 30)"
+        table2 = self._tableOfMonth(midday+1, self.monthLastDay)
+        table2.attrs["transform"] = "translate(30 %d)" % (7 * 50)
+        self.svg.append(table2)
 
 
-        self.svg.append(t)
+        self.svg.append(SVGNode("text", **{
+            "x": "421pt", "y": "240pt", "class": "title",
+            "text-anchor": "middle",
+        }).append("%d年%d月 天文普及月历" % (self.year, self.month)))
+
 
 
     def _tableOfMonth(self, start, end):
         data = []
+        data.append(["农历"] + list(self._rowLunarDate(start, end)))
+        data.append([" "])
+
         data.append(["儒略日"] + list(self._rowJulian(start, end)))
         data.append(["恒星时"] + list(self._rowSidereal(start, end)))
         for e in self._rowsSun(start,end): data.append(e)
+        data.append([" "])
+        for e in self._rowsMoon(start, end): data.append(e)
 
-        headers = [" " * 9]
+        headers = [" " * 8]
         for i in range(start, end+1):
             dt = datetime.datetime(self.year, self.month, i)
             weekday = "一二三四五六日"[dt.weekday()]
             headers.append("%02d (%s)" % (i, weekday))
+
         table = svgTable(data, headers, fontsize=7)
         return table 
 
+    def _rowLunarDate(self, start, end):
+        for day in range(start, end+1):
+            ld = LunarDate.fromSolarDate(self.year, self.month, day)
+            ldMonth = "正二三四五六七八九十冬腊"[ld.month-1] + "月"
+            if ld.isLeapMonth:
+                ldMonth = "闰" + ldMonth
+            if ld.day <= 10:
+                ldDay = "初" + "一二三四五六七八九十"[ld.day-1]
+            elif ld.day < 20:
+                ldDay = "十" + "一二三四五六七八九"[ld.day-11]
+            elif ld.day == 20:
+                ldDay = "二十"
+            elif ld.day < 30:
+                ldDay = "廿" + "一二三四五六七八九"[ld.day-21]
+            elif ld.day == 30:
+                ldDay = "三十"
+            yield ldMonth + ldDay
 
     def _rowJulian(self, start, end):
         for day in range(start, end+1):
@@ -203,6 +208,23 @@ class MonthGenerator:
             retEq.append( convertSidereal(Angle(hours=equation_of_time)) )
         
         return [retRA, retDEC, retEcllon, retEq]
+
+    def _rowsMoon(self, start, end):
+        monthdata = self.calculationResults["moonphase"][self.month]
+        ret = []
+        for lat in [20, 30, 35, 40, 45, 50]:
+            retRise = ["%02dN 月出" % lat]
+            retSet  = ["    月落"] 
+            for day in range(start, end+1):
+                retRise.append(
+                    monthdata[day]["riseset"][lat]["rise"] or "---")
+                retSet.append(
+                    monthdata[day]["riseset"][lat]["set"] or "---")
+            ret.append(retRise)
+            ret.append(retSet)
+        return ret
+                
+
 
 
     def save(self, path):
