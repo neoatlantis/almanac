@@ -121,6 +121,7 @@ class MonthGenerator:
             font-weight: bold;
             font-size: 15pt;
             fill: black;
+            z-index:1000;
         }
     """
 
@@ -134,6 +135,7 @@ class MonthGenerator:
             "solarterms": getCached("solarterms", self.year),
             "sunriseset": getCached("sunriseset", self.year),
             "events": getCached("events", self.year),
+            "planets": getCached("planets", self.year),
         }
 
         self.front = SVGNode(
@@ -149,11 +151,9 @@ class MonthGenerator:
 
         self.front.append("<style>%s</style>" % self.STYLE)
         self.back.append("<style>%s</style>" % self.STYLE)
+        self.decoratePage(self.front)
+        self.decoratePage(self.back)
 
-        SVGNode("rect", 
-            x=0, y=0, width="100%", height="100%",
-            fill="#DDDDDD", stroke="red", 
-        ).appendTo(self.front).appendTo(self.back)
 
         midday = ceil(self.monthLastDay / 2) 
 
@@ -161,37 +161,117 @@ class MonthGenerator:
         table1.attrs["transform"] = "translate(30 40)"
         self.front.append(table1)
 
-        tableE = self._tableOfEvents()
-        tableE.attrs["transform"] = "translate(30 %d)" % (7 * 80)
+        tableE = self._tableOfEvents(1, self.monthLastDay)
+        tableE.attrs["transform"] = "translate(580 530)"
         self.front.append(tableE)
+
+        x, y = 30, 530
+        for day in [1, 6, 11]:
+            self._tableOfPlanets(day)\
+            .attr("transform", "translate(%d %d)" % (x, y))\
+            .appendTo(self.front)
+            x += 180
+        x, y = 30, 640
+        for day in [16, 21, 26]:
+            self._tableOfPlanets(day)\
+            .attr("transform", "translate(%d %d)" % (x, y))\
+            .appendTo(self.front)
+            x += 180
+            
+
 
         table2 = self._tableOfMonth(midday+1, self.monthLastDay)
         table2.attrs["transform"] = "translate(30 %d)" % (7 * 50)
         #self.front.append(table2)
 
 
-        self.front.append(SVGNode("text", **{
-            "x": "85%", "y": "95%", "class": "title",
+
+    def decoratePage(self, page):
+        SVGNode("rect", 
+            x=0, y=0, width="100%", height="100%",
+            fill="#DDD", stroke="red", 
+        ).appendTo(page)
+
+        SVGNode("text", **{
+            "x": "50%",
+            "y": "55%",
+            "style": "font-size:300pt; font-family:sans; font-weight:bold",
+            "fill": "white",
             "text-anchor": "middle",
-        }).append("%d年%d月 天文普及月历" % (self.year, self.month)))
+        }).append( str(self.month) ).appendTo(page)
+
+        SVGNode("text", **{
+            "x": "50%",
+            "y": "80%",
+            "style": "font-size:150pt; font-family:sans; font-weight:bold",
+            "fill": "white",
+            "text-anchor": "middle",
+        }).append( str(self.year) ).appendTo(page)
+
+        logo = SVGNode("g", transform="translate(1000 700)").append(
+            SVGNode("text", **{
+                "x": "0", "y": "0", "class": "title",
+                "text-anchor": "left",
+                "transform": "rotate(-90)"
+            }).append( "%04d年%02d月" % (self.year, self.month) )
+        ).append(
+            SVGNode("text", **{
+                "x": "0", "y": "20", "class": "title",
+                "text-anchor": "left",
+                "transform": "rotate(-90)"
+            }).append( "天文普及月历" )
+        )
+        logo.appendTo(page)
 
 
-    def _tableOfEvents(self):
+    def _tableOfPlanets(self, day):
+        headers = ["%02d日" % day, "视赤经", "视赤纬", "视黄经"]
+        items = [
+            ("Mercury", "水星"),
+            ("Venus", "金星"),
+            ("Mars", "火星"),
+            ("Jupiter", "木星"),
+            ("Saturn", "土星"),
+            ("Uranus", "天王星"),
+            ("Neptune", "海王星"),
+        ]
+        data = []
+        for planetName, planetTranslation in items:
+            src = self.calculationResults["planets"][planetName][self.month][day]
+            data.append([
+                planetTranslation,
+                convertHM(  Angle(hours=src["ra"]) ),
+                convertDeg( Angle(degrees=src["dec"]) ),
+                convertDeg( Angle(degrees=src["ecllon"]) ),
+            ])
+
+            
+        table = svgTable(
+            data, headers,
+            fontsize=7, lineheight=1.7, headerwidth=1.9
+        )
+        return table 
+
+
+
+    def _tableOfEvents(self, start, end):
         node = SVGNode("g")
         data = []
         x = 0
         y = 0
         count = 0
-        MAXROWS = 15
-        COLWIDTH = 200
+        MAXROWS = 20 
+        COLWIDTH = 180
         for each in self.calculationResults["events"][self.month-1]:
+            day = int(each[1])
+            if not (start <= day <= end): continue
             count += 1
             n = SVGNode("text", **{
                 "x": x,
                 "y": y,
                 "class": "common"
             }).append("%02d日 %s %s" % (
-                int(each[1]), each[2], each[3]
+                day, each[2], each[3]
             ))
             node.append(n)
             y += 10
@@ -358,5 +438,5 @@ class MonthGenerator:
 
 
 if __name__ == "__main__":
-    x = MonthGenerator(2020, 1)
+    x = MonthGenerator(2020, 10)
     x.save()
