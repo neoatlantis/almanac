@@ -348,7 +348,7 @@ class MonthGenerator:
         for day in range(start, end+1):
             if (self.month, day) in solartermTable:
                 solarterm = solartermTable[(self.month, day)]
-                yield solartermName + " " + stDatetime.strftime("%H%M")
+                yield solarterm[0] + " " + solarterm[1].strftime("%H%M")
                 continue
 
             ld = LunarDate.fromSolarDate(self.year, self.month, day)
