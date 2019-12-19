@@ -174,22 +174,24 @@ class MonthGenerator:
             xmlns="http://www.w3.org/2000/svg"
         )
 
+        tableE, tableECols = self._tableOfEvents(1, self.monthLastDay)
+        tableE.attrs["transform"] = "translate(%d %d)" % (self.ANCHOR_BOTTOM_LEFT)
+
+        table1 = self._tableOfMonth(1, 16)
+        table1.attrs["transform"] = "translate(%d %d)" % (self.ANCHOR_TOP_LEFT)
+
+        table2 = self._tableOfMonth(self.monthLastDay-15, self.monthLastDay)
+        table2.attrs["transform"] = "translate(%d %d)" % (self.ANCHOR_TOP_LEFT)
+
         self.front.append(self.DEFS).append("<style>%s</style>" % self.STYLE)
         self.back.append(self.DEFS).append("<style>%s</style>" % self.STYLE)
-        self.decoratePage(self.front)
-        self.decoratePage(self.back)
+        self.decoratePage(self.front, withFigure=(tableECols <= 4))
+        self.decoratePage(self.back, withFigure=(tableECols <= 4))
 
-
-        midday = ceil(self.monthLastDay / 2) 
-
-        table1 = self._tableOfMonth(1, midday)
-        table1.attrs["transform"] = "translate(%d %d)" % (self.ANCHOR_TOP_LEFT)
         self.front.append(table1)
+        self.back.append(table2)
 
-        tableE = self._tableOfEvents(1, self.monthLastDay)
-        tableE.attrs["transform"] = "translate(%d %d)" % (self.ANCHOR_BOTTOM_LEFT)
-        self.front.append(tableE)
-        self.back.append(tableE)
+        tableE.appendTo(self.front).appendTo(self.back)
 
         x, y = self.ANCHOR_MIDDLE_LEFT 
         for day in [1, 5, 9, 13, 17]:
@@ -204,12 +206,6 @@ class MonthGenerator:
             .attr("transform", "translate(%d %d)" % (x, y))\
             .appendTo(self.back)
             x += 180
-            
-        # Back side
-
-        table2 = self._tableOfMonth(self.monthLastDay-15, self.monthLastDay)
-        table2.attrs["transform"] = "translate(%d %d)" % (self.ANCHOR_TOP_LEFT)
-        self.back.append(table2)
 
 
     def _addCheatsheet(self, page):
@@ -228,7 +224,7 @@ class MonthGenerator:
         addtext(800, 200, 80, "经度差1度=时间差4分钟")
 
 
-    def decoratePage(self, page):
+    def decoratePage(self, page, withFigure=True):
         SVGNode("rect", 
             x=0, y=0, width="100%", height="100%",
             fill="#DFDFDF"
@@ -279,11 +275,12 @@ class MonthGenerator:
         )
         logo.appendTo(page)
 
-        SVGNode("g",
-            transform="translate(%d %d) scale(0.4 0.4)" % (
-                700, self.ANCHOR_BOTTOM_LEFT[1] - 30
-            )
-        ).append(self.fig1).appendTo(page)
+        if withFigure:
+            SVGNode("g",
+                transform="translate(%d %d) scale(0.4 0.4)" % (
+                    720, self.ANCHOR_BOTTOM_LEFT[1] - 30
+                )
+            ).append(self.fig1).appendTo(page)
 
 
     def _tableOfPlanets(self, day):
@@ -340,7 +337,7 @@ class MonthGenerator:
             if count % MAXROWS == 0:
                 y = 0
                 x += COLWIDTH
-        return node 
+        return node, ceil(count / MAXROWS)
 
 
     def _tableOfMonth(self, start, end):

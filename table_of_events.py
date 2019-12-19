@@ -64,14 +64,14 @@ def derivate(f):
 
 class MoonTrack:
 
-    PERIGEE = "Perigee / 近地点"
-    APOGEE = "Apogee / 远地点"
-
     def __init__(self):
         self.year_period = (
             timescale.utc(YEAR, 1, 1),
             timescale.utc(YEAR, 12, 31, 23, 59, 59)
         )
+
+    PERIGEE = "Perigee / 近地点"
+    APOGEE = "Apogee / 远地点"
 
     def findApsides(self):
         def f(t):
@@ -94,10 +94,8 @@ class MoonTrack:
             for t, y in critical_points
         ]
 
-
-
-    ECLIPTIC_PASSAGE_ASCENDING = "Ecliptic Passage(Ascending) / 升交点"
-    ECLIPTIC_PASSAGE_DECENDING = "Ecliptic Passage(Decending) / 降交点"
+    ECLIPTIC_PASSAGE_ASCENDING = "Ecliptic Passage(Ascending) / 黄道升交点"
+    ECLIPTIC_PASSAGE_DECENDING = "Ecliptic Passage(Decending) / 黄道降交点"
 
     def findEclipticPassage(self):
         def f(t):
@@ -120,7 +118,59 @@ class MoonTrack:
             ))
         return outputs
 
-#for ti, yi in MoonTrack().findEclipticPassage():
+    EQUATORIAL_PASSAGE_ASCENDING = "Equatorial Passage(Ascending) / 赤道升交点"
+    EQUATORIAL_PASSAGE_DECENDING = "Equatorial Passage(Decending) / 赤道降交点"
+
+    def findEquatorialPassage(self):
+        def f(t):
+            t._nutation_angles = iau2000b(t.tt)
+            observ = Earth.at(t).observe(Moon).apparent().radec()
+            return observ[1].degrees
+        f.rough_period = 14
+        roots = root_finder(
+            f=f,
+            start_time=self.year_period[0], end_time=self.year_period[1]
+        )
+        outputs = []
+        for t0, dec0 in roots:
+            t1 = t0.ts.tt_jd(t0.tt + 1)
+            dec1 = f(t1)
+            outputs.append((
+                t0,
+                self.EQUATORIAL_PASSAGE_ASCENDING if dec1 > dec0 else
+                self.EQUATORIAL_PASSAGE_DECENDING
+            ))
+        return outputs
+
+    EQUATORIAL_FARTHEST_NORTH = "Equatorial Farthest North / 赤纬北点"
+    EQUATORIAL_FARTHEST_SOUTH = "Equatorial Farthest South / 赤纬南点"
+
+    def findEquatorialFarthest(self):
+
+        def f(t):
+            t._nutation_angles = iau2000b(t.tt)
+            observ = Earth.at(t).observe(Moon).apparent().radec()
+            return observ[1].degrees
+        f.rough_period = 14 
+        critical_points = critical_point_finder(
+            start_time=self.year_period[0],
+            end_time=self.year_period[1],
+            f=f
+        )
+        return [
+            (
+                t[1],
+                (
+                    self.EQUATORIAL_FARTHEST_SOUTH\
+                    if y[2]-y[1]>0 and y[1]-y[0]<0\
+                    else self.EQUATORIAL_FARTHEST_NORTH,
+                    y[1]
+                )
+            )
+            for t, y in critical_points
+        ]
+
+#for ti, yi in MoonTrack().findEquatorialFarthest():
 #    print(ti.utc_iso(), yi)
 #exit()
 
@@ -319,6 +369,8 @@ class StationaryFinder:
 founds = {
     "moon_apsides": [],
     "moon_ecliptic_passages": [],
+    "moon_equatorial_passages": [],
+    "moon_equatorial_farthest": [],
     "moon_conjunctions": {
         Regulus: [],
         Aldebaran: [],
@@ -432,6 +484,10 @@ print("Searching for moon apsides...")
 founds["moon_apsides"] = moonTrack.findApsides()
 print("Searching for moon ecliptic passages...")
 founds["moon_ecliptic_passages"] = moonTrack.findEclipticPassage()
+print("Searching for moon equatorial passages...")
+founds["moon_equatorial_passages"] = moonTrack.findEquatorialPassage()
+print("Searching for moon equatorial farthest...")
+founds["moon_equatorial_farthest"] = moonTrack.findEquatorialFarthest()
 
 ##############################################################################
 # Sort out events into month and push to table buffer
@@ -447,7 +503,7 @@ def filterEvents(source, month):
 
 def translateMeteorShower(eventsList):
     return [
-        (t, utcT, "%s,ZHR=%s" % (data["name"], data["ZHR"]))
+        (t, utcT, "%s ZHR=%s" % (data["name"], data["ZHR"]))
         for t, utcT, data in eventsList
     ]
 
@@ -457,9 +513,20 @@ def translateMoonApsides(eventsList):
         for t, utcT, data in eventsList
     ]
 
-def translateMoonEclipticPassages(eventsList):
+def translateMoonEclipticOrEquatorialPassages(eventsList):
     return [
         (t, utcT, "月球过" + data.split("/")[-1].strip())
+        for t, utcT, data in eventsList
+    ]
+
+def translateMoonEquatorialFarthest(eventsList):
+    return [
+        (
+            t,
+            utcT,
+            "月球过" + data[0].split("/")[-1].strip() +\
+            " %0.1f°" % abs(data[1])
+        )
         for t, utcT, data in eventsList
     ]
 
@@ -472,7 +539,7 @@ def translateMoonConjunctionEvents(eventsList, starName):
         else:
             output.append((
                 t, utcT,
-                "%s合月 %.1f%s" % (
+                "%s合月 %.1f°%s" % (
                     starName,
                     abs(decDiff),
                     "N" if decDiff > 0 else "S"
@@ -531,15 +598,19 @@ for month in range(1, 13):
     monthEvents += translateMoonPhases(
         filterEvents(founds["moon_phases"], month))
 
-    # 近地点 远地点
+    # 月球 近地点 远地点
 
     monthEvents += translateMoonApsides(
         filterEvents(founds["moon_apsides"], month))
 
-    # 升交点 降交点
+    # 月球 黄道/赤道 升/降交点，赤纬南北点
 
-    monthEvents += translateMoonEclipticPassages(
+    monthEvents += translateMoonEclipticOrEquatorialPassages(
         filterEvents(founds["moon_ecliptic_passages"], month))
+    monthEvents += translateMoonEclipticOrEquatorialPassages(
+        filterEvents(founds["moon_equatorial_passages"], month))
+    monthEvents += translateMoonEquatorialFarthest(
+        filterEvents(founds["moon_equatorial_farthest"], month))
 
     # 二十四节气
 
