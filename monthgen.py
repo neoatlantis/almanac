@@ -42,14 +42,13 @@ def convertHMS(ra):
 
 def convertDeg(deg):
     sign, d, m, _ = deg.signed_dms()
-    return "%s%d°%02d'" % (convertSign(sign), d, m)
+    return "%s%d<tspan class='red'>°</tspan>%02d<tspan class='red'>'</tspan>"\
+        % (convertSign(sign), d, m)
 
 def convertSidereal(sr):
     sign, _, m, s = sr.signed_hms()
-    return "%s%dm%02ds" % (convertSign(sign), m, s)
-
-
-
+    return "%s%d<tspan class='sup' dy='-3'>m</tspan>" % (convertSign(sign), m) +\
+        "<tspan dy='3'>%02d</tspan><tspan class='sup' dy='-3'>s</tspan>" % s
 
 
 
@@ -118,10 +117,8 @@ class MonthGenerator:
         .table-first-cell{
             text-align: right;
         }
-        .sup{
-            font-size: 6pt;
-            fill: red;
-        }
+        .red{ fill: red; }
+        .sup{ font-size: 6pt; fill: red; }
         .common,.table-cell,.table-header{
             font-family: NotoMono, monospace;
             font-size: 7pt;
@@ -135,6 +132,10 @@ class MonthGenerator:
             font-size: 15pt;
             fill: black;
             z-index:1000;
+        }
+        .cheatsheet{
+            font-size:30pt; font-family:sans; font-weight:bold;
+            fill: white;
         }
     """
 
@@ -208,6 +209,21 @@ class MonthGenerator:
         self.back.append(table2)
 
 
+    def _addCheatsheet(self, page):
+        # write formula onto background in white
+        def addtext(x, y, r, text):
+            g = SVGNode("g", transform="translate(%d %d) rotate(%d)" % (x,y,r))
+            SVGNode("text", **{
+                "x": "0", "y": "0",
+                "class": "cheatsheet",
+                "text-anchor": "left",
+            }).append(text).appendTo(g)
+            g.appendTo(page)
+
+        addtext(100, 400, -60, "时差=视太阳时-平太阳时")
+        addtext(120, 700, -70, "当地恒星时=格林尼治恒星时+经度")
+        addtext(800, 300, 80, "经度差1度=时间差4分钟")
+
 
     def decoratePage(self, page):
         SVGNode("rect", 
@@ -231,7 +247,9 @@ class MonthGenerator:
             "text-anchor": "middle",
         }).append( str(self.year) ).appendTo(page)
 
-        logo = SVGNode("g", transform="translate(980 720)").append(
+        self._addCheatsheet(page)
+
+        logo = SVGNode("g", transform="translate(965 720)").append(
             SVGNode("text", **{
                 "x": "0", "y": "0", "class": "title",
                 "text-anchor": "left",
@@ -245,10 +263,16 @@ class MonthGenerator:
             }).append( "天文普及月历" )
         ).append(
             SVGNode("text", **{
-                "x": "0", "y": 35,
+                "x": "0", "y": 40,
                 "text-anchor": "left",
                 "transform": "rotate(-90)",
-            }).append("By NeoAtlantis. 所有时间为UTC.")
+            }).append("采用本初子午圈. 所有时间为UTC.")
+        ).append(
+            SVGNode("text", **{
+                "x": "0", "y": 55,
+                "text-anchor": "left",
+                "transform": "rotate(-90)",
+            }).append("作者: NeoAtlantis")
         )
         logo.appendTo(page)
 
@@ -316,8 +340,8 @@ class MonthGenerator:
         data.append(["月相"] + list(self._rowMoonPhase(start, end)))
         
         data.append([" "])
-        data.append(["儒略日"] + list(self._rowJulian(start, end)))
-        data.append(["恒星时"] + list(self._rowSidereal(start, end)))
+        data.append(["UTC=0h..儒略日"] + list(self._rowJulian(start, end)))
+        data.append(["........恒星时"] + list(self._rowSidereal(start, end)))
         for e in self._rowsSun(start,end): data.append(e)
         
 
@@ -387,8 +411,8 @@ class MonthGenerator:
             yield convertHMS(Angle(hours=sidereal_time(utc0)))
 
     def _rowsSun(self, start, end):
-        retRA, retDEC = ["太阳视赤经"], ["...视赤纬"]
-        retEcllon, retEq = ["...视黄经"], ["均时差"]
+        retRA, retDEC = ["....太阳 视赤经"], ["........视赤纬"]
+        retEcllon, retEq = ["........视黄经"], ["........均时差"]
 
         for day in range(start, end+1):
             tdb0 = timescale.tdb(self.year, self.month, day, 0, 0, 0)
@@ -488,6 +512,7 @@ if __name__ == "__main__":
     YEAR = int(sys.argv[1])
     assert YEAR > 2000 and YEAR < 3000
     filenames = []
+#    for i in [12]: #range(1, 13):
     for i in range(1, 13):
         print("Generating for %d month %d..." % (YEAR, i))
         x = MonthGenerator(YEAR, i)
