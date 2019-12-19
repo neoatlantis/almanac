@@ -342,8 +342,11 @@ class MonthGenerator:
 
     def _tableOfMonth(self, start, end):
         data = []
-        data.append(["农历"] + list(self._rowLunarDate(start, end)))
-        data.append(["月相"] + list(self._rowMoonPhase(start, end)))
+        row1, row2 = self._rowSubcalendar(start, end)
+        data.append([""] + row1)
+        data.append([""] + row2)
+        #data.append(["农历"] + list(self._rowLunarDate(start, end)))
+        #data.append(["月相"] + list(self._rowMoonPhase(start, end)))
         
         data.append([" "])
         data.append(["UTC=0h..儒略日"] + list(self._rowJulian(start, end)))
@@ -363,7 +366,7 @@ class MonthGenerator:
         table = svgTable(data, headers, fontsize=7, lineheight=1.7)
         return table 
 
-    def _rowLunarDate(self, start, end):
+    def _rowSubcalendar(self, start, end):
         solartermTable = {}
         solarterms = self.calculationResults["solarterms"]["solarterms-iso"]
         UTC = timezone("UTC") 
@@ -374,13 +377,11 @@ class MonthGenerator:
                 solartermName,
                 stDatetime
             )
+        moondata = self.calculationResults["moonphase"][self.month]
 
+        row1, row2 = [], []
+        # row1: by default lunar dates
         for day in range(start, end+1):
-            if (self.month, day) in solartermTable:
-                solarterm = solartermTable[(self.month, day)]
-                yield solarterm[0] + " " + solarterm[1].strftime("%H%M")
-                continue
-
             ld = LunarDate.fromSolarDate(self.year, self.month, day)
             ldMonth = "正二三四五六七八九十冬腊"[ld.month-1] + "月"
             if ld.isLeapMonth:
@@ -395,16 +396,29 @@ class MonthGenerator:
                 ldDay = "廿" + "一二三四五六七八九"[ld.day-21]
             elif ld.day == 30:
                 ldDay = "三十"
-            yield ldMonth + ldDay
-
-    def _rowMoonPhase(self, start, end):
-        moondata = self.calculationResults["moonphase"][self.month]
+            row1.append( ldMonth + ldDay )
+        # row2: by default solarterm or moon phase
+        display = lambda x, y: x + y.rjust(7-len(x), " ")
         for day in range(start, end+1):
-            phase = moondata[day]["phase"]
-            if phase:
-                yield phase.replace(":", "")
+            displaySolarterm = None
+            if (self.month, day) in solartermTable:
+                st = solartermTable[(self.month, day)]
+                displaySolarterm = display(st[0], st[1].strftime("%H%M"))
+            displayMoonPhase = None
+            if moondata[day]["phase"]:
+                displayMoonPhase = moondata[day]["phase"].replace(":", "")
+                displayMoonPhase = displayMoonPhase.split(" ")
+                displayMoonPhase.reverse()
+                displayMoonPhase = display(*displayMoonPhase)
+            if not displaySolarterm and not displayMoonPhase:
+                row2.append(" ")
+            elif bool(displaySolarterm) ^ bool(displayMoonPhase):
+                row2.append(displaySolarterm or displayMoonPhase)
             else:
-                yield "" 
+                row2.append(displayMoonPhase)
+                row1[len(row2) - 1] = displaySolarterm
+        return row1, row2
+
 
     def _rowJulian(self, start, end):
         for day in range(start, end+1):
