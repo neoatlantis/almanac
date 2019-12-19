@@ -212,7 +212,7 @@ class MonthGenerator:
     def decoratePage(self, page):
         SVGNode("rect", 
             x=0, y=0, width="100%", height="100%",
-            fill="#DFDFDF", stroke="red", 
+            fill="#DFDFDF"
         ).appendTo(page)
 
         SVGNode("text", **{
@@ -231,7 +231,7 @@ class MonthGenerator:
             "text-anchor": "middle",
         }).append( str(self.year) ).appendTo(page)
 
-        logo = SVGNode("g", transform="translate(1000 700)").append(
+        logo = SVGNode("g", transform="translate(980 720)").append(
             SVGNode("text", **{
                 "x": "0", "y": "0", "class": "title",
                 "text-anchor": "left",
@@ -243,6 +243,12 @@ class MonthGenerator:
                 "text-anchor": "left",
                 "transform": "rotate(-90)"
             }).append( "天文普及月历" )
+        ).append(
+            SVGNode("text", **{
+                "x": "0", "y": 35,
+                "text-anchor": "left",
+                "transform": "rotate(-90)",
+            }).append("By NeoAtlantis. 所有时间为UTC.")
         )
         logo.appendTo(page)
 
@@ -468,8 +474,10 @@ class MonthGenerator:
             "-o", backname + ".pdf",
             backname + ".svg"
         ])
-        #os.unlink(frontname + ".svg")
-        #os.unlink(backname + ".svg")
+        os.unlink(frontname + ".svg")
+        os.unlink(backname + ".svg")
+
+        return (frontname + ".pdf", backname + ".pdf")
 
 
 
@@ -477,5 +485,16 @@ class MonthGenerator:
 
 
 if __name__ == "__main__":
-    x = MonthGenerator(2020, 10)
-    x.save()
+    YEAR = int(sys.argv[1])
+    assert YEAR > 2000 and YEAR < 3000
+    filenames = []
+    for i in range(1, 13):
+        print("Generating for %d month %d..." % (YEAR, i))
+        x = MonthGenerator(YEAR, i)
+        a, b = x.save()
+        filenames.append(a)
+        filenames.append(b)
+
+    run(["pdfunite"] + filenames + ["%d.pdf" % YEAR])
+    for f in filenames:
+        os.unlink(f)
