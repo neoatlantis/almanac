@@ -160,6 +160,9 @@ class MonthGenerator:
             "planets": getCached("planets", self.year),
         }
 
+        self.fig1 = open("fig1.svg", "r").read().split("\n")
+        self.fig1 = "".join(self.fig1[3:])
+
         self.front = SVGNode(
             "svg",
             viewBox="0 0 %dpt %dpt" % (self.PAGE_SIZE),
@@ -222,7 +225,7 @@ class MonthGenerator:
 
         addtext(100, 400, -60, "时差=视太阳时-平太阳时")
         addtext(120, 700, -70, "当地恒星时=格林尼治恒星时+经度")
-        addtext(800, 300, 80, "经度差1度=时间差4分钟")
+        addtext(800, 200, 80, "经度差1度=时间差4分钟")
 
 
     def decoratePage(self, page):
@@ -275,6 +278,12 @@ class MonthGenerator:
             }).append("作者: NeoAtlantis")
         )
         logo.appendTo(page)
+
+        SVGNode("g",
+            transform="translate(%d %d) scale(0.4 0.4)" % (
+                700, self.ANCHOR_BOTTOM_LEFT[1] - 30
+            )
+        ).append(self.fig1).appendTo(page)
 
 
     def _tableOfPlanets(self, day):
@@ -512,7 +521,6 @@ if __name__ == "__main__":
     YEAR = int(sys.argv[1])
     assert YEAR > 2000 and YEAR < 3000
     filenames = []
-#    for i in [12]: #range(1, 13):
     for i in range(1, 13):
         print("Generating for %d month %d..." % (YEAR, i))
         x = MonthGenerator(YEAR, i)
