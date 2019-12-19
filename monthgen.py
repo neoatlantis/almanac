@@ -5,7 +5,9 @@ import sys
 import calendar
 from subprocess import run
 import datetime
+import dateutil.parser
 from math import ceil
+from pytz import timezone
 
 from lunardate import LunarDate
 
@@ -101,6 +103,17 @@ def svgTable(
 
 class MonthGenerator:
 
+    DEFS = """
+    <defs>
+    <style>
+    @font-face{
+        font-family: NotoMono;
+        src: url("./NotoMono.ttf");
+    }
+    </style>
+    </defs>
+    """
+
     STYLE = """
         .table-first-cell{
             text-align: right;
@@ -110,7 +123,7 @@ class MonthGenerator:
             fill: red;
         }
         .common,.table-cell,.table-header{
-            font-family: monospace;
+            font-family: NotoMono, monospace;
             font-size: 7pt;
             fill: black;
             white-space: pre;
@@ -125,10 +138,18 @@ class MonthGenerator:
         }
     """
 
+    PAGE_SIZE = (1052, 744)
+    ANCHOR_TOP_LEFT = (30, 30)
+    ANCHOR_MIDDLE_LEFT = (30, 520)
+    ANCHOR_BOTTOM_LEFT = (30, 630)
+
     def __init__(self, year, month):
         self.year = year
         self.month = month
         self.monthLastDay = calendar.monthrange(year, month)[1]
+
+        self.frontRange = (1, 16)
+        self.backRange = (self.monthLastDay - 15, self.monthLastDay)
 
         self.calculationResults = {
             "moonphase": getCached("moonphase", self.year),
@@ -140,17 +161,17 @@ class MonthGenerator:
 
         self.front = SVGNode(
             "svg",
-            viewBox="0 0 1052pt 744pt",
+            viewBox="0 0 %dpt %dpt" % (self.PAGE_SIZE),
             xmlns="http://www.w3.org/2000/svg"
         )
         self.back = SVGNode(
             "svg",
-            viewBox="0 0 842pt 595pt",
+            viewBox="0 0 %dpt %dpt" % (self.PAGE_SIZE),
             xmlns="http://www.w3.org/2000/svg"
         )
 
-        self.front.append("<style>%s</style>" % self.STYLE)
-        self.back.append("<style>%s</style>" % self.STYLE)
+        self.front.append(self.DEFS).append("<style>%s</style>" % self.STYLE)
+        self.back.append(self.DEFS).append("<style>%s</style>" % self.STYLE)
         self.decoratePage(self.front)
         self.decoratePage(self.back)
 
@@ -158,38 +179,40 @@ class MonthGenerator:
         midday = ceil(self.monthLastDay / 2) 
 
         table1 = self._tableOfMonth(1, midday)
-        table1.attrs["transform"] = "translate(30 40)"
+        table1.attrs["transform"] = "translate(%d %d)" % (self.ANCHOR_TOP_LEFT)
         self.front.append(table1)
 
         tableE = self._tableOfEvents(1, self.monthLastDay)
-        tableE.attrs["transform"] = "translate(580 530)"
+        tableE.attrs["transform"] = "translate(%d %d)" % (self.ANCHOR_BOTTOM_LEFT)
         self.front.append(tableE)
+        self.back.append(tableE)
 
-        x, y = 30, 530
-        for day in [1, 6, 11]:
+        x, y = self.ANCHOR_MIDDLE_LEFT 
+        for day in [1, 5, 9, 13, 17]:
             self._tableOfPlanets(day)\
             .attr("transform", "translate(%d %d)" % (x, y))\
             .appendTo(self.front)
             x += 180
-        x, y = 30, 640
-        for day in [16, 21, 26]:
+
+        x, y = self.ANCHOR_MIDDLE_LEFT 
+        for day in [12, 16, 20, 24, self.monthLastDay]:
             self._tableOfPlanets(day)\
             .attr("transform", "translate(%d %d)" % (x, y))\
-            .appendTo(self.front)
+            .appendTo(self.back)
             x += 180
             
+        # Back side
 
-
-        table2 = self._tableOfMonth(midday+1, self.monthLastDay)
-        table2.attrs["transform"] = "translate(30 %d)" % (7 * 50)
-        #self.front.append(table2)
+        table2 = self._tableOfMonth(self.monthLastDay-15, self.monthLastDay)
+        table2.attrs["transform"] = "translate(%d %d)" % (self.ANCHOR_TOP_LEFT)
+        self.back.append(table2)
 
 
 
     def decoratePage(self, page):
         SVGNode("rect", 
             x=0, y=0, width="100%", height="100%",
-            fill="#DDD", stroke="red", 
+            fill="#DFDFDF", stroke="red", 
         ).appendTo(page)
 
         SVGNode("text", **{
@@ -260,7 +283,7 @@ class MonthGenerator:
         x = 0
         y = 0
         count = 0
-        MAXROWS = 20 
+        MAXROWS = 10 
         COLWIDTH = 180
         for each in self.calculationResults["events"][self.month-1]:
             day = int(each[1])
@@ -305,7 +328,23 @@ class MonthGenerator:
         return table 
 
     def _rowLunarDate(self, start, end):
+        solartermTable = {}
+        solarterms = self.calculationResults["solarterms"]["solarterms-iso"]
+        UTC = timezone("UTC") 
+        for solartermName in solarterms:
+            stDatetime = dateutil.parser\
+                .parse(solarterms[solartermName]).astimezone(UTC)
+            solartermTable[(stDatetime.month, stDatetime.day)] = (
+                solartermName,
+                stDatetime
+            )
+
         for day in range(start, end+1):
+            if (self.month, day) in solartermTable:
+                solarterm = solartermTable[(self.month, day)]
+                yield solartermName + " " + stDatetime.strftime("%H%M")
+                continue
+
             ld = LunarDate.fromSolarDate(self.year, self.month, day)
             ldMonth = "正二三四五六七八九十冬腊"[ld.month-1] + "月"
             if ld.isLeapMonth:
@@ -342,8 +381,8 @@ class MonthGenerator:
             yield convertHMS(Angle(hours=sidereal_time(utc0)))
 
     def _rowsSun(self, start, end):
-        retRA, retDEC = ["视赤经"], ["视赤纬"]
-        retEcllon, retEq = ["视黄经"], ["均时差"]
+        retRA, retDEC = ["太阳视赤经"], ["...视赤纬"]
+        retEcllon, retEq = ["...视黄经"], ["均时差"]
 
         for day in range(start, end+1):
             tdb0 = timescale.tdb(self.year, self.month, day, 0, 0, 0)
@@ -360,10 +399,10 @@ class MonthGenerator:
 
             retRA.append( convertHM(ra) )
             retDEC.append( convertDeg(dec) )
-            retEcllon.append( convertDeg(dec) )
+            retEcllon.append( convertDeg(ecllon) )
             retEq.append( convertSidereal(Angle(hours=equation_of_time)) )
         
-        return [retRA, retDEC, retEcllon, retEq]
+        return [retEq, retRA, retDEC, retEcllon]
 
     def _rowsRiseset(self, start, end):
         moondata = self.calculationResults["moonphase"][self.month]

@@ -238,25 +238,50 @@ class GreatestSunElongation:
             timescale.utc(YEAR, 1, 1),
             timescale.utc(YEAR, 12, 31, 23, 59, 59)
         )
-        self.sun = ephemeris["sun"]
-        self.topos_at = ephemeris["earth"].at
+        self.topos_at = Earth.at
 
-    def findRough(self, star):
+    def find(self, planet):
+        assert planet in [Mercury, Venus]
+        def observ(t):
+            return (
+                self.topos_at(t).observe(Sun).apparent().position.au,
+                self.topos_at(t).observe(planet).apparent().position.au
+            )
 
-        def finder(t):
+        def g(t):
             t._nutation_angles = iau2000b(t.tt)
-            sunRA, sunDec, _ = self.topos_at(t).observe(sun).apparent().radec('date')
-            starRA, starDec, _ = self.topos_at(t).observe(star).apparent().radec('date')
+            vec1, vec2 = observ(t)
 
+            def norm(v):
+                v2 = v**2
+                return (v2[0] + v2[1] + v2[2]) ** 0.5
 
+            dotS = vec1[0]*vec2[0] + vec1[1]*vec2[1] + vec1[2]*vec2[2]
+            cosVec1Vec2 = dotS / norm(vec1) / norm(vec2)
+            angle = np.arccos(cosVec1Vec2)
+            return angle
+            #return sunEcllon.degrees - planetEcllon.degrees
 
-            minRA = self.__minRA(star, t)
-            return minRA < 1.0 / 60
-        finder.rough_period = 1/29
-        t, y = almanac.find_discrete(
-            self.year_period[0], self.year_period[1],
-            finder
+        g.rough_period = 40
+        critical_points = critical_point_finder(
+            start_time=self.year_period[0],
+            end_time=self.year_period[1],
+            f=g
         )
+        found = []
+        for t3, _ in critical_points:
+            t1 = t3[1].tt
+            t0 = t1 - 1
+            t2 = t1 + 1
+            y3 = g(t3[1].ts.tt_jd(np.array([t0, t1, t2])))
+
+            if (y3[0] < y3[1] and y3[2] < y3[1]):
+                ti = t3[1].ts.tt_jd(t1)
+                vec1, vec2 = observ(ti)
+                k = 1 if np.cross(vec1, vec2)[2] > 0 else -1
+                found.append((ti, k * y3[1] * 180 / np.pi ))
+        return found # (timescale, separation angle (+: east, -: west))
+
 
 
 class StationaryFinder:
@@ -309,6 +334,10 @@ founds = {
     },
     "moon_phases": [],
     "solarterms": [],
+    "sun_elongations": {
+        Mercury: [],
+        Venus: [],
+    },
     "stationaries": {
         Mercury: [],
         Venus: [],
@@ -364,7 +393,12 @@ for solarterm in solarterms:
     solartermTime = dateutil.parser.parse(solarterms[solarterm])
     ts = timescale.utc(solartermTime)
     founds["solarterms"].append((ts, solarterm))
-
+#-----------------------------------------------------------------------------
+# search for sun elongations
+print("Searching for sun elongations for Mercury and Venus...")
+sunElongationFinder = GreatestSunElongation()
+for planet in founds["sun_elongations"]:
+    founds["sun_elongations"][planet] = sunElongationFinder.find(planet)
 #-----------------------------------------------------------------------------
 # Find out conjunctions with a few stars
 if 1:
@@ -376,7 +410,7 @@ if 1:
 
 #-----------------------------------------------------------------------------
 # Find out stationaries
-if True:
+if 1:
     print("Searching for stationaries...")
     stationariesFinder = StationaryFinder()
     for star in founds["stationaries"]:
@@ -460,6 +494,18 @@ def translateMoonPhases(eventsList):
         output.append((t, utcT, ["朔", "上弦", "望", "下弦"][data]))
     return output
 
+def translateSunElongations(eventsList, planetName):
+    output = []
+    for t, utcT, data in eventsList:
+        direction = "东" if data > 0 else "西"
+        output.append((
+            t,
+            utcT,
+            "%s%s大距 %.2f°" % (planetName, direction, abs(data))
+        ))
+    return output
+    
+
 def translateSolarterms(eventsList):
     output = []
     for t, utcT, solarterm in eventsList:
@@ -506,6 +552,12 @@ for month in range(1, 13):
         Mercury: "水星", Venus: "金星", Mars: "火星", Jupiter: "木星",
         Saturn: "土星", Uranus: "天王星", Neptune: "海王星", Pluto: "冥王星"
     }
+
+    for planet in [Mercury, Venus]:
+        monthEvents += translateSunElongations(
+            filterEvents(founds["sun_elongations"][planet], month),
+            listPlanet[planet]
+        )
 
     for star in listStar:
         # 合月
