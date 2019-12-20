@@ -2,6 +2,7 @@ tmp.dat
 *.eps
 *~
 *.svg
+!fig*.svg
 __pycache__
 \#*
 *.sw?

@@ -24,6 +24,7 @@ import sys
 import numpy as np
 from pytz import timezone
 import dateutil.parser
+import time
 
 import PyGnuplot as gp
 
@@ -98,11 +99,12 @@ class DiagramOfPlanets:
                 for i in range(0, len(deltas))
             ])
 
-
+        
+        gp.c("set term svg size 600,240")
+        gp.c('set output "temp.svg"')
 
         gp.s(data)
 
-        gp.c('set size ratio 0.4')
         gp.c("""set ydata time""")
         gp.c("set timefmt \"%Y-%m-%dT%H:%M:%S\"")
         gp.c("set format y \"%Y-%m\"")
@@ -116,21 +118,28 @@ class DiagramOfPlanets:
         gp.c("""set xrange [24:0]""")
         gp.c("""set xtics 1""")
 
-        gp.c('set key outside reverse samplen 1 width -3 font "monospace,8pt"')
+        gp.c('set key outside reverse samplen 1 width -4 font "monospace,8pt"')
         gp.c('set grid xtics ytics')
         #gp.c("""plot for[n=2:9] "tmp.dat" u n:1""")
 
         gp.c("plot " + ",".join([
-            '"tmp.dat" using %d:1 title "%s" enhanced with linespoints pi 10 lt rgb "black" dt 1' % 
+            '"tmp.dat" using %d:1 title "%s" enhanced with linespoints pi 10 ps 0.7 lt rgb "black" dt 1' % 
             (i+2, self.ALL_OBJECTS_NAME[i])
             for i in range(0, len(self.ALL_OBJECTS))
         ] + [
-            '"tmp.dat" using %d:1 title "%d" at end with points pt 0 ps 1 lc rgb "black" ' % 
+            '"tmp.dat" using %d:1 title "%d" at end with points pt 0 ps 0.3 lc rgb "black" ' % 
             (i + 10, i*2)
             for i in range(0, 13)
         ]))
-            
 
+        gp.c("unset output")
+        while True:
+            time.sleep(0.1)
+            ret = open("temp.svg", "r").read()
+            if "</svg>" in ret: break 
+        os.unlink("temp.svg")
+        os.unlink("tmp.dat")
+        return ret
 
 
 
@@ -139,4 +148,4 @@ if __name__ == "__main__":
     assert 2000 < YEAR < 3000
 
     c = DiagramOfPlanets(YEAR, 1)
-    c.hourAngleDiagramm()
+    print(c.hourAngleDiagramm())

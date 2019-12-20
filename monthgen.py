@@ -278,7 +278,7 @@ class MonthGenerator:
         if withFigure:
             SVGNode("g",
                 transform="translate(%d %d) scale(0.4 0.4)" % (
-                    720, self.ANCHOR_BOTTOM_LEFT[1] - 30
+                    720, self.ANCHOR_BOTTOM_LEFT[1] - 15 
                 )
             ).append(self.fig1).appendTo(page)
 
