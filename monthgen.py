@@ -19,6 +19,7 @@ from _svgnode import *
 from _calendar import listDates
 from save_calculations import cached, CalculationResults, getCached
 
+from diagram_of_planets import DiagramOfPlanets
 
 
 objects = load("de421.bsp")
@@ -144,6 +145,18 @@ class MonthGenerator:
     ANCHOR_MIDDLE_LEFT = (30, 520)
     ANCHOR_BOTTOM_LEFT = (30, 630)
 
+
+    def __stripSVG(self, svgtext):
+        lines = svgtext.split("\n")
+        found = False
+        ret = []
+        for line in lines:
+            if not found and "<svg" not in line: continue
+            found = True
+            ret.append(line)
+        return "\n".join(ret)
+
+
     def __init__(self, year, month):
         self.year = year
         self.month = month
@@ -160,8 +173,9 @@ class MonthGenerator:
             "planets": getCached("planets", self.year),
         }
 
-        self.fig1 = open("fig1.svg", "r").read().split("\n")
-        self.fig1 = "".join(self.fig1[3:])
+        self.diagramOfPlanets = DiagramOfPlanets(self.year, self.month)
+
+        self.fig1 = self.__stripSVG(open("fig1.svg", "r").read())
 
         self.front = SVGNode(
             "svg",
@@ -186,27 +200,42 @@ class MonthGenerator:
         self.front.append(self.DEFS).append("<style>%s</style>" % self.STYLE)
         self.back.append(self.DEFS).append("<style>%s</style>" % self.STYLE)
         self.decoratePage(self.front, withFigure=(tableECols <= 4))
-        self.decoratePage(self.back, withFigure=(tableECols <= 4))
+        self.decoratePage(self.back, withFigure=False)
 
-        self.front.append(table1)
-        self.back.append(table2)
+        # front page
 
-        tableE.appendTo(self.front).appendTo(self.back)
+        self.front.append(table1).append(tableE)
 
         x, y = self.ANCHOR_MIDDLE_LEFT 
-        for day in [1, 5, 9, 13, 17]:
+        for day in [1, 9, 17, 25, self.monthLastDay]:
             self._tableOfPlanets(day)\
             .attr("transform", "translate(%d %d)" % (x, y))\
             .appendTo(self.front)
             x += 180
 
-        x, y = self.ANCHOR_MIDDLE_LEFT 
-        for day in [12, 16, 20, 24, self.monthLastDay]:
-            self._tableOfPlanets(day)\
-            .attr("transform", "translate(%d %d)" % (x, y))\
-            .appendTo(self.back)
-            x += 180
+        # back page
 
+        self.back.append(table2)
+
+        SVGNode(
+            "g",
+            transform="translate(%d %d) scale(0.9 0.9)" % (
+                415,
+                self.ANCHOR_MIDDLE_LEFT[1] - 25 
+            )
+        ).append(
+            self.__stripSVG(self.diagramOfPlanets.hourAngleDiagram())
+        ).appendTo(self.back)
+
+        SVGNode(
+            "g",
+            transform="translate(%d %d) scale(0.9 0.9)" % (
+                self.ANCHOR_MIDDLE_LEFT[0] - 10,
+                self.ANCHOR_MIDDLE_LEFT[1] - 25
+            )
+        ).append(
+            self.__stripSVG(self.diagramOfPlanets.decDiagram())
+        ).appendTo(self.back)
 
     def _addCheatsheet(self, page):
         # write formula onto background in white
@@ -281,6 +310,7 @@ class MonthGenerator:
                     720, self.ANCHOR_BOTTOM_LEFT[1] - 15 
                 )
             ).append(self.fig1).appendTo(page)
+
 
 
     def _tableOfPlanets(self, day):
@@ -538,6 +568,7 @@ if __name__ == "__main__":
         a, b = x.save()
         filenames.append(a)
         filenames.append(b)
+        #break
 
     run(["pdfunite"] + filenames + ["%d.pdf" % YEAR])
     for f in filenames:
