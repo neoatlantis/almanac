@@ -1,3 +1,5 @@
+tmp.dat
+*.eps
 *~
 *.svg
 __pycache__
