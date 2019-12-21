@@ -12,7 +12,7 @@ from _constants import *
 from _rootfinder import  root_finder, critical_point_finder
 from _spheric_dist import spherical_distance
 
-from _calendar import listDates
+from _calendar import listDates, MonthShifter
 from save_calculations import CalculationResults
 
 from math import ceil
@@ -43,16 +43,17 @@ class DiagramOfPlanets:
     OBJECT_SYMBOLS = "日水金火木土天海"
 
     def __init__(self, year, month, extension=2):
-        midtime = timescale.utc(year, month, 15)
-        starttime = timescale.ut1(jd=midtime.tt - (31 * extension +1 ))
-        endtime   = timescale.ut1(jd=midtime.tt + (31 * extension +32))
-        starttime = timescale.utc(starttime.utc[0], starttime.utc[1], 1)
-        endMonthLastDay = calendar.monthrange(
-            endtime.utc[0], endtime.utc[1])[1]
-        endtime   = timescale.utc(endtime.utc[0], endtime.utc[1], 1)
-#            endtime.utc[0], endtime.utc[1], endMonthLastDay, 23, 59, 59)
+        monthShifter = MonthShifter(year=year, month=month)
+
+        startYearMonth = monthShifter - extension
+        endYearMonth   = monthShifter + (extension + 1)
+
+        starttime = timescale.utc(*startYearMonth, 1, 0, 0, 0)
+        endtime   = timescale.utc(*endYearMonth, 1, 0, 0, 0)
 
         self.timerange = (starttime, endtime)
+        #self.months = [monthShifter + i for i in range(-extension, extension+2)]
+
         self._calc()
 
     def _calc(self):
@@ -93,7 +94,7 @@ class DiagramOfPlanets:
             self.timerange[0].utc_strftime("%Y-%m-%d"),
             self.timerange[1].utc_strftime("%Y-%m-%d")
         ))
-        gp.c('set ytics 2592746')
+        gp.c('set ytics 2592000')
 
 
 
@@ -117,7 +118,7 @@ class DiagramOfPlanets:
         gp.c("""set xtics 10""")
         gp.c("""set mxtics 5""")
         gp.c("""set format y ''""")
-        gp.c('set x2label "赤纬"')
+        gp.c('set x2label "太阳及各行星赤纬 [°]"')
 
         gp.c('set nokey')
         gp.c('set grid xtics ytics')
@@ -184,7 +185,7 @@ class DiagramOfPlanets:
         gp.c("set format x \"%02.0f\"")
         gp.c("""set xrange [24:0]""")
         gp.c("""set xtics 1""")
-        gp.c('set x2label "上中天时刻"')
+        gp.c('set x2label "太阳及各行星上中天时刻(地方时) [h]"')
 
 
         #gp.c('set key outside reverse samplen 1 width -4 font "monospace,8pt"')
@@ -217,6 +218,6 @@ if __name__ == "__main__":
     YEAR = int(sys.argv[1])
     assert 2000 < YEAR < 3000
 
-    c = DiagramOfPlanets(YEAR, 6)
+    c = DiagramOfPlanets(YEAR, 8)
     print(c.hourAngleDiagram())
     #print(c.decDiagram())

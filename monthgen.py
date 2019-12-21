@@ -294,7 +294,7 @@ class MonthGenerator:
                 "x": "0", "y": 40,
                 "text-anchor": "left",
                 "transform": "rotate(-90)",
-            }).append("采用本初子午圈. 所有时间为UTC.")
+            }).append("采用本初子午圈. 所有时刻为UTC.")
         ).append(
             SVGNode("text", **{
                 "x": "0", "y": 55,
