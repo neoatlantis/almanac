@@ -78,6 +78,7 @@ def calculateMoonPhase(year):
         founds[mm][dd] = {
             "riseset": {},
             "phase": None,
+            "phase-iso": None,
         }
         for lat, _ in locations:
             founds[mm][dd]["riseset"][lat] = {'rise': None, 'set': None}
@@ -104,6 +105,7 @@ def calculateMoonPhase(year):
     t, y = almanac.find_discrete(utcStart, utcEnd, almanac.moon_phases(ephemeris421))
     for ti, yi in zip(t, y):
         yyyy, mm, dd, _, __, ___ = ti.utc
+        founds[mm][dd]["phase-iso"] = (ti.utc_iso(), int(yi))
         founds[mm][dd]["phase"] = translatePhase((ti, yi))
 
     return founds
@@ -137,3 +139,19 @@ with CalculationResults("moon_rise_and_set", YEAR) as writer:
             line.append(riseset["set"] or "---")
 
         writer.writeline(" & ".join(line) + " \\\\")
+
+
+with CalculationResults("moonphase", YEAR, "json") as writer:
+    jsondump = {}
+    for month in founds:
+        for day in founds[month]:
+            phaseData = founds[month][day]["phase-iso"]
+            if phaseData is None: continue
+            jsondump["%02d-%02d" % (month, day)] = {
+                "phase": phaseData[1],
+                "time": phaseData[0],
+            }
+
+    writer.writeline(json.dumps(jsondump))
+
+
