@@ -179,12 +179,16 @@ class MonthGenerator:
 
         self.front = SVGNode(
             "svg",
-            viewBox="0 0 %dpt %dpt" % (self.PAGE_SIZE),
+            viewBox="0 0 %d %d" % (self.PAGE_SIZE),
+            width="297mm",
+            height="210mm",
             xmlns="http://www.w3.org/2000/svg"
         )
         self.back = SVGNode(
             "svg",
-            viewBox="0 0 %dpt %dpt" % (self.PAGE_SIZE),
+            viewBox="0 0 %d %d" % (self.PAGE_SIZE),
+            width="297mm",
+            height="210mm",
             xmlns="http://www.w3.org/2000/svg"
         )
 

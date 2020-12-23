@@ -416,19 +416,24 @@ founds = {
 #-----------------------------------------------------------------------------
 # Load meteor showers
 print("Loading meteor showers...")
-meteorShowerTranslations = yaml.load(open(
-    os.path.join("external_predictions", "meteor_shower_names.yaml"),
-    "r").read())
-meteorShowers = yaml.load(open(
-    os.path.join("external_predictions", str(YEAR), "meteor_shower.yaml"),
-    "r").read())
-for each in meteorShowers:
-    meteorShower = meteorShowers[each]
-    meteorShower["name"] = meteorShowerTranslations[each]["zh_CN"]
-    date = meteorShower["date"]
-    date = date.replace(tzinfo=UTC)
-    t = timescale.utc(date)
-    founds["meteor_showers"].append((t, meteorShower))
+meteorShowers = None
+try:
+    meteorShowerTranslations = yaml.load(open(
+        os.path.join("external_predictions", "meteor_shower_names.yaml"),
+        "r").read())
+    meteorShowers = yaml.load(open(
+        os.path.join("external_predictions", str(YEAR), "meteor_shower.yaml"),
+        "r").read())
+except:
+    print("Meteor showers list not prepared or have error. Omitting...")
+if meteorShowers != None:
+    for each in meteorShowers:
+        meteorShower = meteorShowers[each]
+        meteorShower["name"] = meteorShowerTranslations[each]["zh_CN"]
+        date = meteorShower["date"]
+        date = date.replace(tzinfo=UTC)
+        t = timescale.utc(date)
+        founds["meteor_showers"].append((t, meteorShower))
 
 #-----------------------------------------------------------------------------
 # sort out moonphase.json and append to register

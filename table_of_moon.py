@@ -88,6 +88,8 @@ def calculateMoonPhase(year):
         utcStart = timescale.utc(yyyy, mm, dd, 0, 0, 0)
         utcEnd   = timescale.utc(yyyy, mm, dd, 23, 59, 59) 
 
+        print("Search moon rise / set @ ", utcStart, utcEnd)
+
         for calcLat, calcTopo in locations:
             t, y = almanac.find_discrete(
                 utcStart,
@@ -98,6 +100,8 @@ def calculateMoonPhase(year):
             for ti, yi in zip(t, y):
                 founds[mm][dd]["riseset"][calcLat]["rise" if yi else "set"] = \
                     translateTime(ti)
+
+    print("Searching for moon phase...")
 
     # 3. calcualte moon phases
     utcStart = timescale.utc(year, 1, 1)
